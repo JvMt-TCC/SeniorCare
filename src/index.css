@@ -1,0 +1,227 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design System for Senior-Friendly App - Rosa e Branco */
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 340 15% 25%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 340 15% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 15% 25%;
+
+    --primary: 330 80% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 330 40% 85%;
+    --primary-glow: 330 60% 75%;
+
+    --secondary: 320 25% 92%;
+    --secondary-foreground: 340 15% 25%;
+
+    --muted: 320 20% 95%;
+    --muted-foreground: 340 10% 45%;
+
+    --accent: 325 70% 80%;
+    --accent-foreground: 340 15% 25%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 320 20% 90%;
+    --input: 320 25% 94%;
+    --ring: 330 80% 65%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(330 80% 65%), hsl(320 70% 75%));
+    --gradient-soft: linear-gradient(135deg, hsl(320 25% 92%), hsl(310 30% 88%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(320 15% 96%));
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -8px hsl(330 50% 70% / 0.25);
+    --shadow-card: 0 8px 32px -12px hsl(330 40% 60% / 0.15);
+    --shadow-button: 0 6px 24px -8px hsl(330 80% 65% / 0.3);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground font-medium;
+    font-size: 16px; /* Tamanho maior para idosos */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #root {
+    @apply min-h-screen w-full;
+  }
+}
+
+@layer components {
+  /* Mobile-first design */
+  .mobile-container {
+    @apply w-full bg-background min-h-screen relative;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Desktop - limita a largura para simular mobile */
+  @media (min-width: 641px) {
+    .mobile-container {
+      @apply max-w-sm mx-auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Mobile - ocupa toda a tela sem margens */
+  @media (max-width: 640px) {
+    .mobile-container {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 100vh;
+    }
+    
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow-x: hidden;
+    }
+
+    html {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  }
+
+  /* Card styles usando design system */
+  .card-soft {
+    @apply bg-card border border-border rounded-2xl p-4;
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-primary {
+    @apply bg-primary text-primary-foreground rounded-2xl p-6;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-button);
+  }
+
+  /* Friend avatar circular */
+  .friend-avatar {
+    @apply w-12 h-12 rounded-full bg-secondary border-2 border-primary-soft flex items-center justify-center;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-button);
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px -8px hsl(330 80% 65% / 0.4);
+  }
+
+  /* Navigation styles */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border;
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Animations */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Senior-friendly text sizes */
+  .text-senior-xl { @apply text-2xl font-bold; }
+  .text-senior-lg { @apply text-xl font-semibold; }
+  .text-senior-base { @apply text-lg; }
+}
