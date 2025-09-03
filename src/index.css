@@ -220,8 +220,92 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Senior-friendly text sizes */
-  .text-senior-xl { @apply text-2xl font-bold; }
-  .text-senior-lg { @apply text-xl font-semibold; }
-  .text-senior-base { @apply text-lg; }
+  /* Senior-friendly text sizes - Mobile Optimized */
+  .text-senior-xl { 
+    @apply text-2xl font-bold leading-tight; 
+  }
+  .text-senior-lg { 
+    @apply text-xl font-semibold leading-snug; 
+  }
+  .text-senior-base { 
+    @apply text-lg leading-relaxed; 
+  }
+  
+  /* Mobile-specific text sizes */
+  @media (max-width: 640px) {
+    .text-senior-xl { 
+      @apply text-3xl font-bold leading-tight; 
+    }
+    .text-senior-lg { 
+      @apply text-2xl font-semibold leading-snug; 
+    }
+    .text-senior-base { 
+      @apply text-xl leading-relaxed; 
+    }
+  }
+
+  /* Touch-friendly elements */
+  .touch-target {
+    @apply min-h-touch min-w-touch p-3 rounded-xl transition-all duration-200;
+    touch-action: manipulation;
+  }
+  
+  .touch-button {
+    @apply touch-target bg-primary text-primary-foreground font-semibold;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-button);
+  }
+  
+  .touch-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px -8px hsl(330 80% 65% / 0.4);
+  }
+  
+  .touch-button:active {
+    transform: translateY(0);
+  }
+
+  /* Mobile-optimized cards */
+  @media (max-width: 640px) {
+    .card-soft {
+      @apply p-6 rounded-3xl;
+    }
+    
+    .card-primary {
+      @apply p-8 rounded-3xl;
+    }
+  }
+
+  /* Safe area handling */
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Enhanced navigation for mobile */
+  @media (max-width: 640px) {
+    .bottom-nav {
+      @apply pb-safe-bottom;
+    }
+  }
+
+  /* Mobile scroll optimization */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Larger touch targets for mobile */
+  @media (max-width: 640px) {
+    .friend-avatar {
+      @apply w-16 h-16;
+    }
+    
+    button, .btn-primary {
+      @apply min-h-touch text-lg px-8 py-4;
+    }
+  }
 }

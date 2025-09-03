@@ -13,22 +13,22 @@ const BottomNavigation = () => {
   ];
 
   return (
-    <nav className="bottom-nav">
-      <div className="flex justify-around items-center py-2 px-4">
+    <nav className="bottom-nav safe-area-bottom">
+      <div className="flex justify-around items-center py-3 px-4">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
           return (
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 ${
+              className={`flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-300 touch-target ${
                 isActive
                   ? "text-primary bg-primary-soft scale-105"
                   : "text-muted-foreground hover:text-primary"
               }`}
             >
-              <Icon size={24} className="mb-1" />
-              <span className="text-xs font-medium">{label}</span>
+              <Icon size={28} className="mb-2" />
+              <span className="text-sm font-medium">{label}</span>
             </Link>
           );
         })}

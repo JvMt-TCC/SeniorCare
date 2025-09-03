@@ -61,47 +61,47 @@ const HomePage = () => {
 
       {/* Amigos */}
       <div className="card-soft slide-up">
-        <h3 className="text-senior-lg text-primary mb-4">Amigos</h3>
-        <div className="flex space-x-3 overflow-x-auto pb-2">
+        <h3 className="text-senior-lg text-primary mb-6">Amigos</h3>
+        <div className="flex space-x-4 overflow-x-auto pb-4 mobile-scroll">
           {/* TROCAR IMAGEM DO USUÁRIO: Substitua o span abaixo por uma tag <img> com src da foto do amigo */}
           {friends.map((friend, index) => (
-            <div key={index} className="flex flex-col items-center min-w-[60px]">
-              <div className="w-12 h-12 bg-primary-soft rounded-full flex items-center justify-center mb-2">
-                <span className="text-primary text-lg font-bold">{friend.name[0]}</span>
+            <div key={index} className="flex flex-col items-center min-w-[80px]">
+              <div className="friend-avatar mb-3">
+                <span className="text-primary text-xl font-bold">{friend.name[0]}</span>
               </div>
-              <span className="text-xs text-center">{friend.name.split(' ')[0]}</span>
+              <span className="text-sm text-center font-medium">{friend.name.split(' ')[0]}</span>
             </div>
           ))}
-          <div className="flex flex-col items-center min-w-[60px]">
+          <div className="flex flex-col items-center min-w-[80px]">
             <button 
               onClick={() => setIsAddFriendOpen(true)}
-              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors mb-2"
+              className="touch-target w-16 h-16 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors mb-3"
             >
-              <Plus size={16} className="text-white" />
+              <Plus size={24} className="text-white" />
             </button>
-            <span className="text-xs text-center">Adicionar</span>
+            <span className="text-sm text-center font-medium">Adicionar</span>
           </div>
         </div>
       </div>
 
       {/* Próximas Tarefas */}
       <div className="card-soft slide-up">
-        <h3 className="text-senior-lg text-primary mb-4">Próximas Tarefas</h3>
-        <div className="space-y-3">
+        <h3 className="text-senior-lg text-primary mb-6">Próximas Tarefas</h3>
+        <div className="space-y-4">
           {futureTasks.length > 0 ? (
             futureTasks.map((task) => (
               <div
                 key={task.id}
-                className="bg-secondary rounded-xl p-4 border border-border hover:shadow-md transition-all"
+                className="bg-secondary rounded-2xl p-6 border border-border hover:shadow-md transition-all"
               >
-                <h4 className="font-semibold text-foreground mb-1">{task.title}</h4>
-                <p className="text-sm text-muted-foreground">
+                <h4 className="font-semibold text-foreground mb-2 text-lg">{task.title}</h4>
+                <p className="text-base text-muted-foreground">
                   {new Date(task.date).toLocaleDateString('pt-BR')}
                 </p>
               </div>
             ))
           ) : (
-            <p className="text-muted-foreground text-center py-4">
+            <p className="text-muted-foreground text-center py-8 text-lg">
               Nenhuma tarefa próxima
             </p>
           )}
@@ -110,12 +110,12 @@ const HomePage = () => {
 
       {/* Alarmes */}
       <div className="card-soft slide-up">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <h3 className="text-senior-lg text-primary">Meus Alarmes</h3>
           <Dialog open={isAlarmDialogOpen} onOpenChange={setIsAlarmDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="btn-primary">
-                <Plus size={16} className="mr-2" />
+              <Button size="lg" className="touch-button">
+                <Plus size={20} className="mr-2" />
                 Adicionar
               </Button>
             </DialogTrigger>
@@ -151,48 +151,48 @@ const HomePage = () => {
           </Dialog>
         </div>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           {alarms.length > 0 ? (
             alarms.map((alarm) => (
               <div
                 key={alarm.id}
-                className="bg-secondary rounded-xl p-4 border border-border hover:shadow-md transition-all"
+                className="bg-secondary rounded-2xl p-6 border border-border hover:shadow-md transition-all"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Clock size={20} className="text-primary" />
+                  <div className="flex items-center space-x-4">
+                    <Clock size={24} className="text-primary" />
                     <div>
-                      <h4 className="font-semibold text-foreground">{alarm.title}</h4>
-                      <p className="text-sm text-muted-foreground">{alarm.time}</p>
+                      <h4 className="font-semibold text-foreground text-lg">{alarm.title}</h4>
+                      <p className="text-base text-muted-foreground">{alarm.time}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <button
                       onClick={() => toggleAlarm(alarm.id)}
-                      className={`w-12 h-6 rounded-full transition-colors ${
+                      className={`w-14 h-8 rounded-full transition-colors touch-target ${
                         alarm.isActive ? 'bg-primary' : 'bg-gray-300'
                       } relative`}
                     >
                       <div
-                        className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                          alarm.isActive ? 'translate-x-6' : 'translate-x-0.5'
-                        } absolute top-0.5`}
+                        className={`w-6 h-6 bg-white rounded-full transition-transform ${
+                          alarm.isActive ? 'translate-x-7' : 'translate-x-1'
+                        } absolute top-1`}
                       />
                     </button>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="lg"
                       onClick={() => removeAlarm(alarm.id)}
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive touch-target"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={20} />
                     </Button>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-muted-foreground text-center py-4">
+            <p className="text-muted-foreground text-center py-8 text-lg">
               Nenhum alarme configurado
             </p>
           )}

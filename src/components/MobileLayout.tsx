@@ -9,7 +9,7 @@ interface MobileLayoutProps {
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   return (
     <div className="mobile-container">
-      <main className="pb-20 p-4 fade-in min-h-screen">
+      <main className="pb-24 px-4 pt-safe-top fade-in min-h-screen mobile-scroll">
         {children}
       </main>
       <FixedChat />

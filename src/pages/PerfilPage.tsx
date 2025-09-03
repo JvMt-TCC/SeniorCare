@@ -122,34 +122,34 @@ const PerfilPage = () => {
 
       {/* Configurações */}
       <div className="card-soft slide-up">
-        <h3 className="text-senior-lg text-primary mb-4">Configurações</h3>
-        <div className="space-y-3">
+        <h3 className="text-senior-lg text-primary mb-6">Configurações</h3>
+        <div className="space-y-4">
           <button 
             onClick={() => setIsEditProfileOpen(true)}
-            className="w-full text-left p-3 rounded-xl bg-secondary hover:bg-primary-soft transition-colors"
+            className="w-full text-left p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition-colors touch-target"
           >
-            <span className="font-medium">Editar Informações Pessoais</span>
+            <span className="font-medium text-lg">Editar Informações Pessoais</span>
           </button>
           <button 
             onClick={() => setIsEditPhoneOpen(true)}
-            className="w-full text-left p-3 rounded-xl bg-secondary hover:bg-primary-soft transition-colors"
+            className="w-full text-left p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition-colors touch-target"
           >
-            <span className="font-medium">Editar Telefone</span>
+            <span className="font-medium text-lg">Editar Telefone</span>
           </button>
           <button 
             onClick={() => setIsChangePasswordOpen(true)}
-            className="w-full text-left p-3 rounded-xl bg-secondary hover:bg-primary-soft transition-colors"
+            className="w-full text-left p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition-colors touch-target"
           >
-            <span className="font-medium">Alterar Senha</span>
+            <span className="font-medium text-lg">Alterar Senha</span>
           </button>
-          <button className="w-full text-left p-3 rounded-xl bg-secondary hover:bg-primary-soft transition-colors">
-            <span className="font-medium">Configurações de Notificação</span>
+          <button className="w-full text-left p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition-colors touch-target">
+            <span className="font-medium text-lg">Configurações de Notificação</span>
           </button>
           <button 
             onClick={() => navigate("/privacy-terms")}
-            className="w-full text-left p-3 rounded-xl bg-secondary hover:bg-primary-soft transition-colors"
+            className="w-full text-left p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition-colors touch-target"
           >
-            <span className="font-medium">Privacidade</span>
+            <span className="font-medium text-lg">Privacidade</span>
           </button>
         </div>
       </div>
@@ -163,10 +163,10 @@ const PerfilPage = () => {
         </p>
       </div>
 
-      <div className="pb-4">
+      <div className="pb-6">
         <button 
           onClick={handleLogout}
-          className="w-full py-3 border border-destructive text-destructive rounded-xl hover:bg-destructive hover:text-destructive-foreground transition-colors"
+          className="w-full py-4 border-2 border-destructive text-destructive rounded-2xl hover:bg-destructive hover:text-destructive-foreground transition-colors touch-target text-lg font-medium"
         >
           Sair da Conta
         </button>
