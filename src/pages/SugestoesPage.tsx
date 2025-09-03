@@ -234,11 +234,15 @@ const SugestoesPage = () => {
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <div className="flex">
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-32 h-32 object-cover flex-shrink-0"
-              />
+              <div className="relative">
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="w-32 h-32 object-cover flex-shrink-0 rounded-2xl border-2 border-primary/20 shadow-lg transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-2xl pointer-events-none"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm"></div>
+              </div>
               <div className="p-4 flex-1">
                 <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                   {event.title}
