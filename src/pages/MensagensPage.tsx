@@ -98,9 +98,9 @@ const MensagensPage = () => {
     const chatMessages = messages[selectedContact.id] || [];
 
     return (
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-[calc(100vh-8rem)]">
         {/* Header do Chat */}
-        <div className="card-soft mb-4 flex items-center">
+        <div className="card-soft mb-4 flex items-center flex-shrink-0">
           <button
             onClick={() => setSelectedContact(null)}
             className="p-2 rounded-xl bg-secondary text-primary hover:bg-primary-soft transition-colors mr-3"
@@ -116,35 +116,37 @@ const MensagensPage = () => {
           </div>
         </div>
 
-        {/* Mensagens */}
-        <div className="flex-1 space-y-3 mb-4 overflow-y-auto">
-          {chatMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-            >
+        {/* Mensagens - Área com scroll */}
+        <div className="flex-1 overflow-y-auto px-1 mb-4" style={{ scrollbarWidth: 'thin' }}>
+          <div className="space-y-3">
+            {chatMessages.map((message) => (
               <div
-                className={`
-                  max-w-xs p-3 rounded-2xl
-                  ${message.sender === 'me' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-secondary text-foreground'
-                  }
-                `}
+                key={message.id}
+                className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
               >
-                <p className="text-senior-base">{message.text}</p>
-                <p className={`text-xs mt-1 ${
-                  message.sender === 'me' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                }`}>
-                  {message.time}
-                </p>
+                <div
+                  className={`
+                    max-w-xs p-3 rounded-2xl
+                    ${message.sender === 'me' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-secondary text-foreground'
+                    }
+                  `}
+                >
+                  <p className="text-senior-base">{message.text}</p>
+                  <p className={`text-xs mt-1 ${
+                    message.sender === 'me' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                  }`}>
+                    {message.time}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Input de Mensagem */}
-        <div className="flex space-x-2 pb-20">
+        {/* Input de Mensagem - Fixo na parte inferior */}
+        <div className="flex space-x-2 bg-background p-2 border-t border-border flex-shrink-0">
           <input
             type="text"
             value={newMessage}
@@ -155,7 +157,7 @@ const MensagensPage = () => {
           />
           <button
             onClick={handleSendMessage}
-            className="btn-primary px-4"
+            className="btn-primary px-4 flex-shrink-0"
           >
             <Send size={20} />
           </button>
