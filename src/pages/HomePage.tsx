@@ -21,14 +21,8 @@ const HomePage = () => {
     { name: "Ana Costa", avatar: "" }
   ]);
 
-  // Filtrar tarefas futuras (incluindo hoje)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const futureTasks = tasks.filter(task => {
-    const taskDate = new Date(task.date);
-    taskDate.setHours(0, 0, 0, 0);
-  return taskDate >= today;
-  });
+  // Mostrar todas as tarefas ordenadas por data
+  const allTasks = tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const handleAddAlarm = () => {
     if (newAlarm.title && newAlarm.time) {
@@ -84,25 +78,52 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Próximas Tarefas */}
+      {/* Todas as Tarefas */}
       <div className="card-soft slide-up">
-        <h3 className="text-senior-lg text-primary mb-6">Próximas Tarefas</h3>
+        <h3 className="text-senior-lg text-primary mb-6">Minhas Tarefas</h3>
         <div className="space-y-4">
-          {futureTasks.length > 0 ? (
-            futureTasks.map((task) => (
-              <div
-                key={task.id}
-                className="bg-secondary rounded-2xl p-6 border border-border hover:shadow-md transition-all"
-              >
-                <h4 className="font-semibold text-foreground mb-2 text-lg">{task.title}</h4>
-                <p className="text-base text-muted-foreground">
-                  {new Date(task.date).toLocaleDateString('pt-BR')}
-                </p>
-              </div>
-            ))
+          {allTasks.length > 0 ? (
+            allTasks.map((task) => {
+              const taskDate = new Date(task.date);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              taskDate.setHours(0, 0, 0, 0);
+              const isPast = taskDate < today;
+              const isToday = taskDate.getTime() === today.getTime();
+              
+              return (
+                <div
+                  key={task.id}
+                  className={`bg-secondary rounded-2xl p-6 border border-border hover:shadow-md transition-all ${
+                    isPast ? 'opacity-75 border-muted' : ''
+                  } ${isToday ? 'ring-2 ring-primary border-primary' : ''}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className={`font-semibold mb-2 text-lg ${isPast ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                        {task.title}
+                      </h4>
+                      <p className={`text-base ${isPast ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
+                        {task.subtitle}
+                      </p>
+                      <p className={`text-base font-medium ${
+                        isToday ? 'text-primary' : isPast ? 'text-muted-foreground' : 'text-foreground'
+                      }`}>
+                        {new Date(task.date).toLocaleDateString('pt-BR')}
+                        {isToday && ' (Hoje)'}
+                        {isPast && ' (Concluída)'}
+                      </p>
+                    </div>
+                    {isPast && (
+                      <div className="text-green-500 text-2xl">✓</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
           ) : (
             <p className="text-muted-foreground text-center py-8 text-lg">
-              Nenhuma tarefa próxima
+              Nenhuma tarefa cadastrada
             </p>
           )}
         </div>

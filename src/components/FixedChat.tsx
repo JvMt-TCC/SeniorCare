@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { Bot, Send, X } from "lucide-react";
 
 const FixedChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +42,7 @@ const FixedChat = () => {
           className="fixed bottom-24 right-4 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-50 hover:scale-110 transition-transform"
           style={{ background: 'var(--gradient-primary)', boxShadow: 'var(--shadow-button)' }}
         >
-          <MessageCircle size={24} />
+          <Bot size={28} />
         </button>
       )}
 
