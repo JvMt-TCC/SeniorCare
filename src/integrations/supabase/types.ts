@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          data_nascimento: string | null
+          email: string
+          endereco: string | null
+          gostos_lazer: Json | null
+          id: string
+          nome: string
+          problemas_saude: Json | null
+          telefone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_nascimento?: string | null
+          email: string
+          endereco?: string | null
+          gostos_lazer?: Json | null
+          id: string
+          nome: string
+          problemas_saude?: Json | null
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_nascimento?: string | null
+          email?: string
+          endereco?: string | null
+          gostos_lazer?: Json | null
+          id?: string
+          nome?: string
+          problemas_saude?: Json | null
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      User: {
+        Row: {
+          Dt_nascimento: string | null
+          "E-mail": string | null
+          Endereço: string | null
+          id: number
+          Lazer: Json | null
+          Nome: string
+          Numero: number | null
+          Problema_Saude: Json | null
+          Senha: string | null
+        }
+        Insert: {
+          Dt_nascimento?: string | null
+          "E-mail"?: string | null
+          Endereço?: string | null
+          id?: number
+          Lazer?: Json | null
+          Nome: string
+          Numero?: number | null
+          Problema_Saude?: Json | null
+          Senha?: string | null
+        }
+        Update: {
+          Dt_nascimento?: string | null
+          "E-mail"?: string | null
+          Endereço?: string | null
+          id?: number
+          Lazer?: Json | null
+          Nome?: string
+          Numero?: number | null
+          Problema_Saude?: Json | null
+          Senha?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
