@@ -41,7 +41,7 @@ const HomePage = () => {
       {/* Header */}
       <div className="text-center pt-4">
         <h1 className="text-senior-xl text-primary mb-2">
-          Bem vindo de volta{user ? `, ${user.name}` : ''}!
+          Bem vindo de volta{user ? `, ${user.user_metadata?.nome || 'usuário'}` : ''}!
         </h1>
       </div>
 

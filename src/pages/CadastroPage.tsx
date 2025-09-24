@@ -1,0 +1,341 @@
+import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Checkbox } from "../components/ui/checkbox";
+import { toast } from "@/hooks/use-toast";
+import Logo from "../images/Logo.jpg";
+
+const problemasSaudeOptions = [
+  "Hipertensão",
+  "Diabetes",
+  "Artrite/Artrose", 
+  "Problemas cardíacos",
+  "Dores nas costas",
+  "Osteoporose",
+  "Depressão/Ansiedade",
+  "Problemas de visão",
+  "Problemas auditivos",
+  "Outro"
+];
+
+const gostosLazerOptions = [
+  "Leitura",
+  "Filmes/TV",
+  "Música",
+  "Dança",
+  "Caminhada",
+  "Jardinagem",
+  "Culinária",
+  "Jogos",
+  "Artesanato",
+  "Viagens",
+  "Esportes",
+  "Teatro",
+  "Fotografia"
+];
+
+const CadastroPage = () => {
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    telefone: "",
+    endereco: "",
+    data_nascimento: "",
+    problemas_saude: [] as string[],
+    gostos_lazer: [] as string[]
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validações
+    if (!formData.nome || !formData.email || !formData.password) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast({
+        title: "Erro", 
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    const { error } = await signup({
+      nome: formData.nome,
+      email: formData.email,
+      password: formData.password,
+      telefone: formData.telefone || undefined,
+      endereco: formData.endereco || undefined,
+      data_nascimento: formData.data_nascimento || undefined,
+      problemas_saude: formData.problemas_saude,
+      gostos_lazer: formData.gostos_lazer
+    });
+    
+    if (error) {
+      toast({
+        title: "Erro no cadastro",
+        description: error,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Cadastro realizado!",
+        description: "Sua conta foi criada com sucesso.",
+      });
+      navigate("/");
+    }
+    
+    setLoading(false);
+  };
+
+  const handleProblemasSaudeChange = (problema: string, checked: boolean) => {
+    if (checked) {
+      setFormData({
+        ...formData,
+        problemas_saude: [...formData.problemas_saude, problema]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        problemas_saude: formData.problemas_saude.filter(p => p !== problema)
+      });
+    }
+  };
+
+  const handleGostosLazerChange = (gosto: string, checked: boolean) => {
+    if (checked) {
+      setFormData({
+        ...formData,
+        gostos_lazer: [...formData.gostos_lazer, gosto]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        gostos_lazer: formData.gostos_lazer.filter(g => g !== gosto)
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary-soft via-background to-secondary flex items-center justify-center p-4 w-full">
+      <div className="w-full max-w-2xl">
+        <Card className="w-full shadow-xl">
+          <CardHeader className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="w-28 h-28 rounded-full border-4 border-pink-500 overflow-hidden">
+                <img
+                  src={Logo}
+                  alt="Logo SeniorCare"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <CardTitle className="text-senior-xl text-primary">
+              Criar Nova Conta
+            </CardTitle>
+            <p className="text-muted-foreground">
+              Preencha suas informações para criar sua conta
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Nome *</label>
+                  <Input
+                    type="text"
+                    value={formData.nome}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nome: e.target.value })
+                    }
+                    placeholder="Digite seu nome completo"
+                    className="text-senior-base"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email *</label>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    placeholder="Digite seu email"
+                    className="text-senior-base"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Senha *</label>
+                  <Input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    placeholder="Digite sua senha"
+                    className="text-senior-base"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Confirmar Senha *</label>
+                  <Input
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({ ...formData, confirmPassword: e.target.value })
+                    }
+                    placeholder="Confirme sua senha"
+                    className="text-senior-base"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Telefone</label>
+                  <Input
+                    type="tel"
+                    value={formData.telefone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, telefone: e.target.value })
+                    }
+                    placeholder="Digite seu telefone"
+                    className="text-senior-base"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Data de Nascimento</label>
+                  <Input
+                    type="date"
+                    value={formData.data_nascimento}
+                    onChange={(e) =>
+                      setFormData({ ...formData, data_nascimento: e.target.value })
+                    }
+                    className="text-senior-base"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Endereço</label>
+                <Input
+                  type="text"
+                  value={formData.endereco}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endereco: e.target.value })
+                  }
+                  placeholder="Digite seu endereço completo"
+                  className="text-senior-base"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-3">Problemas de Saúde</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {problemasSaudeOptions.map((problema) => (
+                    <div key={problema} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`problema-${problema}`}
+                        checked={formData.problemas_saude.includes(problema)}
+                        onCheckedChange={(checked) =>
+                          handleProblemasSaudeChange(problema, checked as boolean)
+                        }
+                      />
+                      <label
+                        htmlFor={`problema-${problema}`}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {problema}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-3">Gostos de Lazer</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {gostosLazerOptions.map((gosto) => (
+                    <div key={gosto} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`gosto-${gosto}`}
+                        checked={formData.gostos_lazer.includes(gosto)}
+                        onCheckedChange={(checked) =>
+                          handleGostosLazerChange(gosto, checked as boolean)
+                        }
+                      />
+                      <label
+                        htmlFor={`gosto-${gosto}`}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {gosto}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  className="w-full btn-primary text-senior-base"
+                  disabled={loading}
+                >
+                  {loading ? "Criando conta..." : "Criar Conta"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full text-senior-base"
+                  onClick={() => navigate("/")}
+                >
+                  Já tem uma conta? Entrar
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default CadastroPage;

@@ -1,55 +1,186 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
+import { toast } from "@/hooks/use-toast";
 
-interface User {
-  name: string;
+interface Profile {
+  id: string;
+  nome: string;
   email: string;
-  phone?: string;
-  profileImage?: string;
+  telefone?: string;
+  endereco?: string;
+  data_nascimento?: string;
+  problemas_saude?: string[];
+  gostos_lazer?: string[];
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (userData: User & { password: string }) => void;
-  logout: () => void;
-  updateProfile: (userData: { name?: string; email?: string; phone?: string }) => void;
-  updateProfileImage: (imageUrl: string) => void;
+  session: Session | null;
+  profile: Profile | null;
+  login: (email: string, password: string) => Promise<{ error?: string }>;
+  signup: (signupData: SignupData) => Promise<{ error?: string }>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
+  loading: boolean;
+}
+
+interface SignupData {
+  nome: string;
+  email: string;
+  password: string;
+  telefone?: string;
+  endereco?: string;
+  data_nascimento?: string;
+  problemas_saude?: string[];
+  gostos_lazer?: string[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData: User & { password: string }) => {
-    // Login fictício - aceita qualquer credencial
-    setUser({ name: userData.name, email: userData.email });
-  };
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch user profile
+          setTimeout(async () => {
+            await fetchProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+        
+        setLoading(false);
+      }
+    );
 
-  const logout = () => {
-    setUser(null);
-  };
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+      
+      setLoading(false);
+    });
 
-  const updateProfile = (userData: { name?: string; email?: string; phone?: string }) => {
-    if (user) {
-      setUser({ ...user, ...userData });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+
+      if (data) {
+        // Convert Json arrays to string arrays safely
+        const profile: Profile = {
+          ...data,
+          problemas_saude: Array.isArray(data.problemas_saude) 
+            ? data.problemas_saude.filter((item): item is string => typeof item === 'string')
+            : [],
+          gostos_lazer: Array.isArray(data.gostos_lazer) 
+            ? data.gostos_lazer.filter((item): item is string => typeof item === 'string')
+            : []
+        };
+        setProfile(profile);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
     }
   };
 
-  const updateProfileImage = (imageUrl: string) => {
-    if (user) {
-      setUser({ ...user, profileImage: imageUrl });
+  const login = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      return {};
+    } catch (error) {
+      return { error: "Erro inesperado ao fazer login" };
+    }
+  };
+
+  const signup = async (signupData: SignupData) => {
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            nome: signupData.nome,
+          }
+        }
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      // If signup is successful and user is confirmed, create profile
+      if (data.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "Cadastro realizado!",
+          description: "Verifique seu email para confirmar o cadastro.",
+        });
+      }
+
+      return {};
+    } catch (error) {
+      return { error: "Erro inesperado ao criar conta" };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+    } catch (error) {
+      console.error("Error logging out:", error);
     }
   };
 
   return (
     <AuthContext.Provider value={{
       user,
+      session,
+      profile,
       login,
+      signup,
       logout,
-      updateProfile,
-      updateProfileImage,
-      isAuthenticated: !!user
+      isAuthenticated: !!user,
+      loading
     }}>
       {children}
     </AuthContext.Provider>

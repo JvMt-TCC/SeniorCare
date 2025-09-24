@@ -11,16 +11,17 @@ interface EditProfileDialogProps {
 }
 
 const EditProfileDialog = ({ isOpen, onOpenChange }: EditProfileDialogProps) => {
-  const { user, updateProfile } = useAuth();
+  const { profile } = useAuth();
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || ""
+    name: profile?.nome || "",
+    email: profile?.email || ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.name.trim() && formData.email.trim()) {
-      updateProfile(formData);
+      // TODO: Implement profile update with Supabase
+      console.log("Profile update functionality to be implemented");
       onOpenChange(false);
     }
   };

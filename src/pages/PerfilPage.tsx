@@ -7,18 +7,18 @@ import EditPhoneDialog from "../components/EditPhoneDialog";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
 
 const PerfilPage = () => {
-  const { user, logout, updateProfileImage } = useAuth();
+  const { user, logout, profile } = useAuth();
   const navigate = useNavigate();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isEditPhoneOpen, setIsEditPhoneOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   
   const userInfo = {
-    name: user?.name || "Usuário",
-    email: user?.email || "usuario@email.com",
-    phone: user?.phone || "(21) 99999-9999",
-    birthDate: "15/03/1960",
-    address: "Niterói, Rio de Janeiro",
+    name: profile?.nome || user?.user_metadata?.nome || "Usuário",
+    email: profile?.email || user?.email || "usuario@email.com",
+    phone: profile?.telefone || "(21) 99999-9999",
+    birthDate: profile?.data_nascimento || "15/03/1960",
+    address: profile?.endereco || "Niterói, Rio de Janeiro",
     joined: "Janeiro 2024"
   };
 
@@ -28,20 +28,15 @@ const PerfilPage = () => {
     { label: "Tarefas Concluídas", value: "48" }
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target?.result as string;
-        updateProfileImage(imageUrl);
-      };
-      reader.readAsDataURL(file);
+      // TODO: Implement image upload to Supabase storage
+      console.log("Image upload functionality to be implemented");
     }
   };
 
@@ -56,18 +51,10 @@ const PerfilPage = () => {
       {/* Foto e informações principais */}
       <div className="card-soft text-center slide-up">
         <div className="relative w-24 h-24 mx-auto mb-4">
-          {/* TROCAR IMAGEM DE PERFIL: A imagem do usuário já é mostrada aqui quando uploadada */}
-          {user?.profileImage ? (
-            <img 
-              src={user.profileImage} 
-              alt="Foto de perfil" 
-              className="w-24 h-24 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-24 h-24 bg-primary-soft rounded-full flex items-center justify-center">
-              <User size={48} className="text-primary" />
-            </div>
-          )}
+          {/* TODO: Implement profile image from Supabase storage */}
+          <div className="w-24 h-24 bg-primary-soft rounded-full flex items-center justify-center">
+            <User size={48} className="text-primary" />
+          </div>
         </div>
         <h2 className="text-senior-xl text-primary mb-2">{userInfo.name}</h2>
       </div>

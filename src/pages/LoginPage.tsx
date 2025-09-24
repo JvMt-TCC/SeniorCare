@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -8,21 +9,41 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import Logo from "../images/Logo.jpg"; // Substitua pelo caminho correto do logo
+import { toast } from "@/hooks/use-toast";
+import Logo from "../images/Logo.jpg";
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.email && formData.password) {
-      login(formData);
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    setLoading(true);
+    const { error } = await login(formData.email, formData.password);
+    
+    if (error) {
+      toast({
+        title: "Erro no login",
+        description: error,
+        variant: "destructive",
+      });
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -50,19 +71,6 @@ const LoginPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Nome</label>
-                <Input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Digite seu nome"
-                  className="text-senior-base"
-                  required
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <Input
@@ -92,8 +100,17 @@ const LoginPage = () => {
               <Button
                 type="submit"
                 className="w-full btn-primary text-senior-base"
+                disabled={loading}
               >
-                Entrar
+                {loading ? "Entrando..." : "Entrar"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full text-senior-base"
+                onClick={() => navigate("/cadastro")}
+              >
+                Criar nova conta
               </Button>
             </form>
           </CardContent>

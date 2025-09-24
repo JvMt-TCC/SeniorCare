@@ -11,8 +11,8 @@ interface EditPhoneDialogProps {
 }
 
 const EditPhoneDialog = ({ isOpen, onOpenChange }: EditPhoneDialogProps) => {
-  const { user, updateProfile } = useAuth();
-  const [phone, setPhone] = useState(user?.phone || "");
+  const { profile } = useAuth();
+  const [phone, setPhone] = useState(profile?.telefone || "");
 
   const formatPhone = (value: string) => {
     // Remove tudo que não é número
@@ -34,7 +34,8 @@ const EditPhoneDialog = ({ isOpen, onOpenChange }: EditPhoneDialogProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.trim()) {
-      updateProfile({ phone });
+      // TODO: Implement phone update with Supabase
+      console.log("Phone update functionality to be implemented");
       onOpenChange(false);
     }
   };
