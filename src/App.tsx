@@ -9,6 +9,7 @@ import CalendarioPage from "./pages/CalendarioPage";
 import MensagensPage from "./pages/MensagensPage";
 import PerfilPage from "./pages/PerfilPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import MeusEventosPage from "./pages/MeusEventosPage";
 import LoginPage from "./pages/LoginPage";
 import CadastroPage from "./pages/CadastroPage";
 import PrivacyTermsPage from "./pages/PrivacyTermsPage";
@@ -50,6 +51,7 @@ const AppContent = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/sugestoes" element={<SugestoesPage />} />
         <Route path="/calendario" element={<CalendarioPage />} />
+        <Route path="/meus-eventos" element={<MeusEventosPage />} />
         <Route path="/mensagens" element={<MensagensPage />} />
         <Route path="/perfil" element={<PerfilPage />} />
         <Route path="/privacy-terms" element={<PrivacyTermsPage />} />

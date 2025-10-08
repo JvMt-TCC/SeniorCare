@@ -1,5 +1,10 @@
-import { MapPin, Calendar, Users } from "lucide-react";
+import { MapPin, Calendar, Plus, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import Baile from "../images/Baile.jpg";
 import arte from "../images/arte.jpg";
 import hidroginastica from "../images/hidroginastica.jpg";
@@ -31,6 +36,94 @@ interface Event {
 }
 
 const SugestoesPage = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [registrations, setRegistrations] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchRegistrations = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('event_id')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Erro ao buscar registros:', error);
+        return;
+      }
+
+      if (data) {
+        setRegistrations(data.map(r => r.event_id));
+      }
+    };
+
+    fetchRegistrations();
+  }, [user]);
+
+  const handleRegister = async (eventId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para se inscrever.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (registrations.includes(eventId)) {
+      // Cancelar inscrição
+      const { error } = await supabase
+        .from('event_registrations')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('event_id', eventId);
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível cancelar a inscrição.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setRegistrations(prev => prev.filter(id => id !== eventId));
+      toast({
+        title: "Sucesso",
+        description: "Inscrição cancelada!",
+      });
+    } else {
+      // Registrar
+      const { error } = await supabase
+        .from('event_registrations')
+        .insert([{ 
+          user_id: user.id, 
+          event_id: eventId,
+          status: 'registrado'
+        }]);
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível fazer a inscrição.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setRegistrations(prev => [...prev, eventId]);
+      toast({
+        title: "Sucesso",
+        description: "Inscrição realizada com sucesso!",
+      });
+    }
+  };
+
   const events: Event[] = [
     {
       id: 1,
@@ -243,14 +336,14 @@ const SugestoesPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-2xl pointer-events-none"></div>
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm"></div>
               </div>
-              <div className="p-4 flex-1">
+              <div className="p-4 flex-1 flex flex-col">
                 <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                   {event.title}
                 </h3>
                 <p className="text-gray-600 mb-3 text-sm leading-relaxed line-clamp-2">
                   {event.description}
                 </p>
-                <div className="space-y-1">
+                <div className="space-y-1 flex-1">
                   <div className="flex items-center text-sm text-gray-500">
                     <Calendar size={14} className="mr-2 text-primary" />
                     {new Date(event.date).toLocaleDateString("pt-BR")}
@@ -260,6 +353,24 @@ const SugestoesPage = () => {
                     <span className="line-clamp-1">{event.location}</span>
                   </div>
                 </div>
+                <Button
+                  onClick={(e) => handleRegister(event.id, e)}
+                  variant={registrations.includes(event.id) ? "default" : "outline"}
+                  size="sm"
+                  className="mt-2 touch-target"
+                >
+                  {registrations.includes(event.id) ? (
+                    <>
+                      <Check size={16} className="mr-1" />
+                      Inscrito
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} className="mr-1" />
+                      Inscrever
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </Link>

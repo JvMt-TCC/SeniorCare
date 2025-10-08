@@ -1,28 +1,78 @@
-import { Plus, User, Clock, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useTasks } from "../contexts/TaskContext";
+import { Plus, Clock, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useAlarms } from "../contexts/AlarmContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
 import AddFriendDialog from "../components/AddFriendDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const HomePage = () => {
-  const { tasks } = useTasks();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { alarms, addAlarm, removeAlarm, toggleAlarm } = useAlarms();
   const [isAlarmDialogOpen, setIsAlarmDialogOpen] = useState(false);
   const [newAlarm, setNewAlarm] = useState({ title: "", time: "" });
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
-  const [friends, setFriends] = useState([
-    { name: "Maria Silva", avatar: "" },
-    { name: "João Santos", avatar: "" },
-    { name: "Ana Costa", avatar: "" }
-  ]);
+  const [friends, setFriends] = useState<Array<{ id: string; name: string; avatar: string | null }>>([]);
+  const [tasks, setTasks] = useState<Array<{ id: string; title: string; subtitle: string | null; date: string }>>([]);
+
+  // Buscar tarefas do Supabase
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: true });
+      
+      if (error) {
+        console.error('Erro ao buscar tarefas:', error);
+        return;
+      }
+      
+      if (data) {
+        setTasks(data.map(t => ({
+          id: t.id,
+          title: t.title,
+          subtitle: t.subtitle || '',
+          date: t.date
+        })));
+      }
+    };
+
+    fetchTasks();
+  }, [user]);
+
+  // Buscar amigos do Supabase
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('friends')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) {
+        console.error('Erro ao buscar amigos:', error);
+        return;
+      }
+      
+      if (data) {
+        setFriends(data);
+      }
+    };
+
+    fetchFriends();
+  }, [user]);
 
   // Mostrar todas as tarefas ordenadas por data
-  const allTasks = tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const allTasks = [...tasks].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const handleAddAlarm = () => {
     if (newAlarm.title && newAlarm.time) {
@@ -32,8 +82,35 @@ const HomePage = () => {
     }
   };
 
-  const handleAddFriend = (friend: { name: string; avatar: string }) => {
-    setFriends(prev => [...prev, friend]);
+  const handleAddFriend = async (friend: { name: string; avatar: string }) => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('friends')
+      .insert([{ 
+        user_id: user.id, 
+        name: friend.name, 
+        avatar: friend.avatar || null 
+      }])
+      .select()
+      .single();
+    
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o amigo.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data) {
+      setFriends(prev => [...prev, data]);
+      toast({
+        title: "Sucesso",
+        description: "Amigo adicionado com sucesso!",
+      });
+    }
   };
 
   return (
