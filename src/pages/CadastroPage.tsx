@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import Logo from "../images/Logo.jpg";
 
 const problemasSaudeOptions = [
+  "Nenhum problema de saúde",
   "Hipertensão",
   "Diabetes",
   "Artrite/Artrose", 
@@ -87,6 +88,19 @@ const CadastroPage = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Validação de telefone
+    if (formData.telefone) {
+      const telefoneNumeros = formData.telefone.replace(/\D/g, '');
+      if (telefoneNumeros.length !== 11) {
+        toast({
+          title: "Erro",
+          description: "O telefone deve conter exatamente 11 dígitos.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -230,15 +244,20 @@ const CadastroPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Telefone</label>
+                  <label className="block text-sm font-medium mb-2">Telefone (11 dígitos)</label>
                   <Input
                     type="tel"
                     value={formData.telefone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, telefone: e.target.value })
-                    }
-                    placeholder="Digite seu telefone"
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 11) {
+                        const formatted = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                        setFormData({ ...formData, telefone: value.length <= 2 ? value : formatted });
+                      }
+                    }}
+                    placeholder="(00) 00000-0000"
                     className="text-senior-base"
+                    maxLength={15}
                   />
                 </div>
                 <div>
