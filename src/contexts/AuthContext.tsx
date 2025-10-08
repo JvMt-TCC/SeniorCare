@@ -138,6 +138,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           emailRedirectTo: redirectUrl,
           data: {
             nome: signupData.nome,
+            telefone: signupData.telefone,
+            endereco: signupData.endereco,
+            data_nascimento: signupData.data_nascimento,
+            problemas_saude: JSON.stringify(signupData.problemas_saude || []),
+            gostos_lazer: JSON.stringify(signupData.gostos_lazer || [])
           }
         }
       });
