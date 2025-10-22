@@ -10,6 +10,9 @@ import MensagensPage from "./pages/MensagensPage";
 import PerfilPage from "./pages/PerfilPage";
 import EventDetailPage from "./pages/EventDetailPage";
 import MeusEventosPage from "./pages/MeusEventosPage";
+import SaudePage from "./pages/SaudePage";
+import MedicamentoDetailPage from "./pages/MedicamentoDetailPage";
+import LocalCuidadoDetailPage from "./pages/LocalCuidadoDetailPage";
 import LoginPage from "./pages/LoginPage";
 import CadastroPage from "./pages/CadastroPage";
 import PrivacyTermsPage from "./pages/PrivacyTermsPage";
@@ -52,6 +55,9 @@ const AppContent = () => {
         <Route path="/sugestoes" element={<SugestoesPage />} />
         <Route path="/calendario" element={<CalendarioPage />} />
         <Route path="/meus-eventos" element={<MeusEventosPage />} />
+        <Route path="/saude" element={<SaudePage />} />
+        <Route path="/saude/medicamentos/:id" element={<MedicamentoDetailPage />} />
+        <Route path="/saude/locais/:id" element={<LocalCuidadoDetailPage />} />
         <Route path="/mensagens" element={<MensagensPage />} />
         <Route path="/perfil" element={<PerfilPage />} />
         <Route path="/privacy-terms" element={<PrivacyTermsPage />} />

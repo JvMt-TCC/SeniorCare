@@ -17,26 +17,7 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 1,
-      title: "Caminhada no parque",
-      subtitle: "Caminhada matinal no Parque da Cidade com o grupo de exercícios",
-      date: "2025-08-12"
-    },
-    {
-      id: 2,
-      title: "Consulta médica",
-      subtitle: "Consulta de rotina com cardiologista Dr. Silva",
-      date: "2025-08-15"
-    },
-    {
-      id: 3,
-      title: "Visita aos netos",
-      subtitle: "Almoço em família",
-      date: "2025-08-18"
-    }
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const addTask = (task: Omit<Task, 'id'>) => {
     setTasks(prev => [...prev, { ...task, id: Date.now() }]);

@@ -1,4 +1,4 @@
-import { Home, Calendar, MessageCircle, User, Lightbulb, Star } from "lucide-react";
+import { Home, Calendar, MessageCircle, User, Lightbulb, Star, Heart } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const BottomNavigation = () => {
@@ -9,26 +9,28 @@ const BottomNavigation = () => {
     { icon: Lightbulb, label: "Sugestões", path: "/sugestoes" },
     { icon: Star, label: "Eventos", path: "/meus-eventos" },
     { icon: Calendar, label: "Calendário", path: "/calendario" },
+    { icon: Heart, label: "Saúde", path: "/saude" },
+    { icon: MessageCircle, label: "Mensagens", path: "/mensagens" },
     { icon: User, label: "Perfil", path: "/perfil" },
   ];
 
   return (
     <nav className="bottom-nav safe-area-bottom">
-      <div className="flex justify-around items-center py-3 px-4">
+      <div className="flex justify-around items-center py-2 px-2 overflow-x-auto">
         {navItems.map(({ icon: Icon, label, path }) => {
-          const isActive = location.pathname === path;
+          const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
           return (
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center py-3 px-4 rounded-xl transition-all duration-300 touch-target ${
+              className={`flex flex-col items-center py-2 px-2 rounded-xl transition-all duration-300 touch-target min-w-fit ${
                 isActive
                   ? "text-primary bg-primary-soft scale-105"
                   : "text-muted-foreground hover:text-primary"
               }`}
             >
-              <Icon size={28} className="mb-2" />
-              <span className="text-sm font-medium">{label}</span>
+              <Icon size={20} className="mb-1" />
+              <span className="text-xs font-medium whitespace-nowrap">{label}</span>
             </Link>
           );
         })}
