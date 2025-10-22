@@ -1,147 +1,215 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send, User, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface Contact {
-  id: number;
-  name: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
+interface Friend {
+  id: string;
+  nome: string;
+  username: string;
+  avatar_url: string | null;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unread?: number;
 }
 
 interface Message {
-  id: number;
-  text: string;
-  sender: 'me' | 'other';
-  time: string;
+  id: string;
+  content: string;
+  from_user_id: string;
+  to_user_id: string;
+  created_at: string;
+  read: boolean;
 }
 
 const MensagensPage = () => {
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const userIdParam = searchParams.get('userId');
+  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const contacts: Contact[] = [
-    {
-      id: 1,
-      name: "Maria Silva",
-      lastMessage: "Oi! Como você está?",
-      time: "14:30",
-      unread: 2
-    },
-    {
-      id: 2,
-      name: "José Santos",
-      lastMessage: "Vamos ao baile hoje?",
-      time: "12:15",
-      unread: 0
-    },
-    {
-      id: 3,
-      name: "Ana Costa",
-      lastMessage: "Obrigada pela receita!",
-      time: "10:45",
-      unread: 1
-    },
-    {
-      id: 4,
-      name: "Carlos Oliveira",
-      lastMessage: "Até amanhã na caminhada",
-      time: "Ontem",
-      unread: 0
-    },
-    {
-      id: 5,
-      name: "Rosa Ferreira",
-      lastMessage: "Parabéns pelo aniversário!",
-      time: "Ontem",
-      unread: 0
+  // Fetch friends list
+  const fetchFriends = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('friends')
+      .select(`
+        friend_user_id,
+        profiles!friends_friend_user_id_fkey(
+          id,
+          nome,
+          username,
+          avatar_url
+        )
+      `)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error fetching friends:', error);
+      return;
     }
-  ];
 
-  const [messages, setMessages] = useState<Record<number, Message[]>>({
-    1: [
-      { id: 1, text: "Oi! Como você está?", sender: 'other', time: "14:30" },
-      { id: 2, text: "Tudo bem, obrigado! E você?", sender: 'me', time: "14:32" },
-      { id: 3, text: "Estou ótima! Que bom saber que você está bem.", sender: 'other', time: "14:35" }
-    ],
-    2: [
-      { id: 1, text: "Vamos ao baile hoje?", sender: 'other', time: "12:15" },
-      { id: 2, text: "Claro! A que horas?", sender: 'me', time: "12:20" },
-      { id: 3, text: "Às 19h. Te busco às 18:30?", sender: 'other', time: "12:22" }
-    ],
-    3: [
-      { id: 1, text: "Obrigada pela receita!", sender: 'other', time: "10:45" },
-      { id: 2, text: "Ficou gostoso?", sender: 'me', time: "10:50" },
-      { id: 3, text: "Delicioso! Minha família adorou.", sender: 'other', time: "11:00" }
-    ]
-  });
+    if (data) {
+      const friendsList = data
+        .filter(f => f.profiles)
+        .map(f => ({
+          id: f.profiles.id,
+          nome: f.profiles.nome,
+          username: f.profiles.username,
+          avatar_url: f.profiles.avatar_url,
+        }));
+      setFriends(friendsList);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() && selectedContact) {
-      const newMsg: Message = {
-        id: Date.now(),
-        text: newMessage.trim(),
-        sender: 'me',
-        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => ({
-        ...prev,
-        [selectedContact.id]: [...(prev[selectedContact.id] || []), newMsg]
-      }));
-
-      setNewMessage("");
+      // If userId param is present, select that friend
+      if (userIdParam) {
+        const friend = friendsList.find(f => f.id === userIdParam);
+        if (friend) {
+          setSelectedFriend(friend);
+        }
+      }
     }
   };
 
-  if (selectedContact) {
-    const chatMessages = messages[selectedContact.id] || [];
+  // Fetch messages
+  const fetchMessages = async (friendId: string) => {
+    if (!user) return;
 
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${friendId}),and(from_user_id.eq.${friendId},to_user_id.eq.${user.id})`)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching messages:', error);
+      return;
+    }
+
+    setMessages(data || []);
+
+    // Mark messages as read
+    await supabase
+      .from('messages')
+      .update({ read: true })
+      .eq('to_user_id', user.id)
+      .eq('from_user_id', friendId)
+      .eq('read', false);
+  };
+
+  useEffect(() => {
+    fetchFriends();
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedFriend) {
+      fetchMessages(selectedFriend.id);
+
+      // Subscribe to new messages
+      const channel = supabase
+        .channel('messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `to_user_id=eq.${user?.id}`,
+          },
+          (payload) => {
+            if (payload.new.from_user_id === selectedFriend.id) {
+              setMessages((prev) => [...prev, payload.new as Message]);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [selectedFriend, user]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedFriend || !user) return;
+
+    const { error } = await supabase
+      .from('messages')
+      .insert({
+        from_user_id: user.id,
+        to_user_id: selectedFriend.id,
+        content: newMessage.trim(),
+      });
+
+    if (error) {
+      console.error('Error sending message:', error);
+      return;
+    }
+
+    setNewMessage("");
+    fetchMessages(selectedFriend.id);
+  };
+
+  if (selectedFriend) {
     return (
       <div className="flex flex-col h-[calc(100vh-8rem)]">
         {/* Header do Chat */}
         <div className="card-soft mb-4 flex items-center flex-shrink-0">
           <button
-            onClick={() => setSelectedContact(null)}
+            onClick={() => setSelectedFriend(null)}
             className="p-2 rounded-xl bg-secondary text-primary hover:bg-primary-soft transition-colors mr-3"
           >
             <ArrowLeft size={20} />
           </button>
-          <div className="friend-avatar mr-3">
-            <User size={20} className="text-primary" />
-          </div>
+          <Avatar className="w-10 h-10 mr-3">
+            <AvatarImage src={selectedFriend.avatar_url || undefined} />
+            <AvatarFallback>
+              {selectedFriend.nome?.charAt(0) || "?"}
+            </AvatarFallback>
+          </Avatar>
           <div>
-            <h2 className="text-senior-lg text-primary">{selectedContact.name}</h2>
-            <p className="text-sm text-muted-foreground">Online</p>
+            <h2 className="text-senior-lg text-primary">{selectedFriend.nome}</h2>
+            <p className="text-sm text-muted-foreground">@{selectedFriend.username}</p>
           </div>
         </div>
 
         {/* Mensagens - Área com scroll */}
         <div className="flex-1 overflow-y-auto px-1 mb-4" style={{ scrollbarWidth: 'thin' }}>
           <div className="space-y-3">
-            {chatMessages.map((message) => (
+            {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.from_user_id === user?.id ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`
                     max-w-xs p-3 rounded-2xl
-                    ${message.sender === 'me' 
+                    ${message.from_user_id === user?.id
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-secondary text-foreground'
                     }
                   `}
                 >
-                  <p className="text-senior-base">{message.text}</p>
+                  <p className="text-senior-base">{message.content}</p>
                   <p className={`text-xs mt-1 ${
-                    message.sender === 'me' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    message.from_user_id === user?.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
                   }`}>
-                    {message.time}
+                    {new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
         </div>
 
@@ -174,29 +242,32 @@ const MensagensPage = () => {
       </div>
 
       <div className="space-y-3">
-        {contacts.map((contact) => (
-          <div
-            key={contact.id}
-            onClick={() => setSelectedContact(contact)}
-            className="card-soft hover:shadow-md transition-all cursor-pointer flex items-center"
-          >
-            <div className="friend-avatar mr-4">
-              <User size={24} className="text-primary" />
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="font-semibold text-foreground">{contact.name}</h3>
-                <span className="text-sm text-muted-foreground">{contact.time}</span>
+        {friends.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            Você ainda não tem amigos adicionados
+          </p>
+        ) : (
+          friends.map((friend) => (
+            <div
+              key={friend.id}
+              onClick={() => setSelectedFriend(friend)}
+              className="card-soft hover:shadow-md transition-all cursor-pointer flex items-center"
+            >
+              <Avatar className="w-12 h-12 mr-4">
+                <AvatarImage src={friend.avatar_url || undefined} />
+                <AvatarFallback>
+                  {friend.nome?.charAt(0) || "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-1">
+                  <h3 className="font-semibold text-foreground">{friend.nome}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">@{friend.username}</p>
               </div>
-              <p className="text-muted-foreground text-sm truncate">{contact.lastMessage}</p>
             </div>
-            {contact.unread > 0 && (
-              <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold ml-2">
-                {contact.unread}
-              </div>
-            )}
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

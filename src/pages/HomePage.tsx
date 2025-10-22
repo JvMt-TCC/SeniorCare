@@ -1,4 +1,4 @@
-import { Plus, Clock, Trash2 } from "lucide-react";
+import { Plus, Clock, Trash2, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useAlarms } from "../contexts/AlarmContext";
@@ -6,8 +6,19 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
 import AddFriendDialog from "../components/AddFriendDialog";
+import FriendProfileModal from "../components/FriendProfileModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+interface Friend {
+  id: string;
+  nome: string;
+  username: string;
+  bio: string | null;
+  avatar_url: string | null;
+  data_nascimento: string | null;
+}
 
 const HomePage = () => {
   const { user } = useAuth();
@@ -16,7 +27,9 @@ const HomePage = () => {
   const [isAlarmDialogOpen, setIsAlarmDialogOpen] = useState(false);
   const [newAlarm, setNewAlarm] = useState({ title: "", time: "" });
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
-  const [friends, setFriends] = useState<Array<{ id: string; name: string; avatar: string | null }>>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+  const [isFriendProfileOpen, setIsFriendProfileOpen] = useState(false);
   const [tasks, setTasks] = useState<Array<{ id: string; title: string; subtitle: string | null; date: string }>>([]);
 
   // Buscar tarefas do Supabase
@@ -49,25 +62,46 @@ const HomePage = () => {
   }, [user]);
 
   // Buscar amigos do Supabase
-  useEffect(() => {
-    const fetchFriends = async () => {
-      if (!user) return;
-      
-      const { data, error } = await supabase
-        .from('friends')
-        .select('*')
-        .eq('user_id', user.id);
-      
-      if (error) {
-        console.error('Erro ao buscar amigos:', error);
-        return;
-      }
-      
-      if (data) {
-        setFriends(data);
-      }
-    };
+  const fetchFriends = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('friends')
+      .select(`
+        id,
+        friend_user_id,
+        profiles!friends_friend_user_id_fkey(
+          id,
+          nome,
+          username,
+          bio,
+          avatar_url,
+          data_nascimento
+        )
+      `)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Erro ao buscar amigos:', error);
+      return;
+    }
+    
+    if (data) {
+      const friendsList = data
+        .filter(f => f.profiles)
+        .map(f => ({
+          id: f.profiles.id,
+          nome: f.profiles.nome,
+          username: f.profiles.username,
+          bio: f.profiles.bio,
+          avatar_url: f.profiles.avatar_url,
+          data_nascimento: f.profiles.data_nascimento,
+        }));
+      setFriends(friendsList);
+    }
+  };
 
+  useEffect(() => {
     fetchFriends();
   }, [user]);
 
@@ -82,35 +116,9 @@ const HomePage = () => {
     }
   };
 
-  const handleAddFriend = async (friend: { name: string; avatar: string }) => {
-    if (!user) return;
-    
-    const { data, error } = await supabase
-      .from('friends')
-      .insert([{ 
-        user_id: user.id, 
-        name: friend.name, 
-        avatar: friend.avatar || null 
-      }])
-      .select()
-      .single();
-    
-    if (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o amigo.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (data) {
-      setFriends(prev => [...prev, data]);
-      toast({
-        title: "Sucesso",
-        description: "Amigo adicionado com sucesso!",
-      });
-    }
+  const handleFriendClick = (friend: Friend) => {
+    setSelectedFriend(friend);
+    setIsFriendProfileOpen(true);
   };
 
   return (
@@ -134,13 +142,19 @@ const HomePage = () => {
       <div className="card-soft slide-up">
         <h3 className="text-senior-lg text-primary mb-6">Amigos</h3>
         <div className="flex space-x-4 overflow-x-auto pb-4 mobile-scroll">
-          {/* TROCAR IMAGEM DO USUÁRIO: Substitua o span abaixo por uma tag <img> com src da foto do amigo */}
-          {friends.map((friend, index) => (
-            <div key={index} className="flex flex-col items-center min-w-[80px]">
-              <div className="friend-avatar mb-3">
-                <span className="text-primary text-xl font-bold">{friend.name[0]}</span>
-              </div>
-              <span className="text-sm text-center font-medium">{friend.name.split(' ')[0]}</span>
+          {friends.map((friend) => (
+            <div 
+              key={friend.id} 
+              className="flex flex-col items-center min-w-[80px] cursor-pointer"
+              onClick={() => handleFriendClick(friend)}
+            >
+              <Avatar className="w-16 h-16 mb-3">
+                <AvatarImage src={friend.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary-soft text-primary text-xl">
+                  {friend.nome.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm text-center font-medium">{friend.nome.split(' ')[0]}</span>
             </div>
           ))}
           <div className="flex flex-col items-center min-w-[80px]">
@@ -148,151 +162,145 @@ const HomePage = () => {
               onClick={() => setIsAddFriendOpen(true)}
               className="touch-target w-16 h-16 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors mb-3"
             >
-              <Plus size={24} className="text-white" />
+              <Plus size={28} className="text-primary-foreground" />
             </button>
             <span className="text-sm text-center font-medium">Adicionar</span>
           </div>
         </div>
       </div>
 
-      {/* Todas as Tarefas */}
+      {/* Tarefas */}
       <div className="card-soft slide-up">
-        <h3 className="text-senior-lg text-primary mb-6">Minhas Tarefas</h3>
-        <div className="space-y-4">
-          {allTasks.length > 0 ? (
+        <h3 className="text-senior-lg text-primary mb-4">Minhas Tarefas</h3>
+        <div className="space-y-3">
+          {allTasks.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              Nenhuma tarefa cadastrada
+            </p>
+          ) : (
             allTasks.map((task) => {
-              const taskDate = new Date(task.date);
+              const taskDate = new Date(task.date + 'T00:00:00');
               const today = new Date();
               today.setHours(0, 0, 0, 0);
-              taskDate.setHours(0, 0, 0, 0);
-              const isPast = taskDate < today;
+              const isPastDue = taskDate < today;
               const isToday = taskDate.getTime() === today.getTime();
-              
+
               return (
                 <div
                   key={task.id}
-                  className={`bg-secondary rounded-2xl p-6 border border-border hover:shadow-md transition-all ${
-                    isPast ? 'opacity-75 border-muted' : ''
-                  } ${isToday ? 'ring-2 ring-primary border-primary' : ''}`}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    isPastDue
+                      ? 'bg-red-50 border-red-200'
+                      : isToday
+                      ? 'bg-primary-soft border-primary'
+                      : 'bg-white border-border'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start">
                     <div className="flex-1">
-                      <h4 className={`font-semibold mb-2 text-lg ${isPast ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                      <h4 className="font-semibold text-foreground mb-1">
                         {task.title}
                       </h4>
-                      <p className={`text-base ${isPast ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
-                        {task.subtitle}
-                      </p>
-                      <p className={`text-base font-medium ${
-                        isToday ? 'text-primary' : isPast ? 'text-muted-foreground' : 'text-foreground'
-                      }`}>
-                        {new Date(task.date).toLocaleDateString('pt-BR')}
-                        {isToday && ' (Hoje)'}
-                        {isPast && ' (Concluída)'}
+                      {task.subtitle && (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {task.subtitle}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(task.date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                        {isToday && <span className="ml-2 text-primary font-medium">• Hoje</span>}
+                        {isPastDue && <span className="ml-2 text-red-600 font-medium">• Atrasada</span>}
                       </p>
                     </div>
-                    {isPast && (
-                      <div className="text-green-500 text-2xl">✓</div>
-                    )}
                   </div>
                 </div>
               );
             })
-          ) : (
-            <p className="text-muted-foreground text-center py-8 text-lg">
-              Nenhuma tarefa cadastrada
-            </p>
           )}
         </div>
       </div>
 
       {/* Alarmes */}
       <div className="card-soft slide-up">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-senior-lg text-primary">Meus Alarmes</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-senior-lg text-primary">Alarmes</h3>
           <Dialog open={isAlarmDialogOpen} onOpenChange={setIsAlarmDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" className="touch-button">
-                <Plus size={20} className="mr-2" />
-                Adicionar
-              </Button>
+              <button className="touch-target p-2 bg-primary rounded-full hover:bg-primary/90 transition-colors">
+                <Plus size={20} className="text-primary-foreground" />
+              </button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Novo Alarme</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Título do Alarme</label>
-                  <Input
-                    type="text"
-                    value={newAlarm.title}
-                    onChange={(e) => setNewAlarm({...newAlarm, title: e.target.value})}
-                    placeholder="Ex: Tomar remédio"
-                    className="text-senior-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Horário</label>
-                  <Input
-                    type="time"
-                    value={newAlarm.time}
-                    onChange={(e) => setNewAlarm({...newAlarm, time: e.target.value})}
-                    className="text-senior-base"
-                  />
-                </div>
-                <Button onClick={handleAddAlarm} className="w-full btn-primary">
-                  Criar Alarme
+                <Input
+                  placeholder="Título do alarme"
+                  value={newAlarm.title}
+                  onChange={(e) => setNewAlarm({ ...newAlarm, title: e.target.value })}
+                  className="text-senior-base"
+                />
+                <Input
+                  type="time"
+                  value={newAlarm.time}
+                  onChange={(e) => setNewAlarm({ ...newAlarm, time: e.target.value })}
+                  className="text-senior-base"
+                />
+                <Button onClick={handleAddAlarm} className="w-full">
+                  Adicionar Alarme
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
-        
-        <div className="space-y-4">
-          {alarms.length > 0 ? (
+
+        <div className="space-y-3">
+          {alarms.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              Nenhum alarme configurado
+            </p>
+          ) : (
             alarms.map((alarm) => (
               <div
                 key={alarm.id}
-                className="bg-secondary rounded-2xl p-6 border border-border hover:shadow-md transition-all"
+                className={`p-4 rounded-xl border-2 flex items-center justify-between ${
+                  alarm.isActive ? 'bg-white border-primary' : 'bg-gray-50 border-gray-200'
+                }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Clock size={24} className="text-primary" />
-                    <div>
-                      <h4 className="font-semibold text-foreground text-lg">{alarm.title}</h4>
-                      <p className="text-base text-muted-foreground">{alarm.time}</p>
-                    </div>
+                <div className="flex items-center space-x-3 flex-1">
+                  <Clock size={24} className={alarm.isActive ? 'text-primary' : 'text-gray-400'} />
+                  <div>
+                    <p className={`font-medium ${alarm.isActive ? 'text-foreground' : 'text-gray-500'}`}>
+                      {alarm.title}
+                    </p>
+                    <p className={`text-lg ${alarm.isActive ? 'text-primary' : 'text-gray-400'}`}>
+                      {alarm.time}
+                    </p>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={() => toggleAlarm(alarm.id)}
-                      className={`w-14 h-8 rounded-full transition-colors touch-target ${
-                        alarm.isActive ? 'bg-primary' : 'bg-gray-300'
-                      } relative`}
-                    >
-                      <div
-                        className={`w-6 h-6 bg-white rounded-full transition-transform ${
-                          alarm.isActive ? 'translate-x-7' : 'translate-x-1'
-                        } absolute top-1`}
-                      />
-                    </button>
-                    <Button
-                      variant="ghost"
-                      size="lg"
-                      onClick={() => removeAlarm(alarm.id)}
-                      className="text-destructive hover:text-destructive touch-target"
-                    >
-                      <Trash2 size={20} />
-                    </Button>
-                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => toggleAlarm(alarm.id)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      alarm.isActive ? 'bg-primary' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        alarm.isActive ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                  <button
+                    onClick={() => removeAlarm(alarm.id)}
+                    className="touch-target p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </div>
             ))
-          ) : (
-            <p className="text-muted-foreground text-center py-8 text-lg">
-              Nenhum alarme configurado
-            </p>
           )}
         </div>
       </div>
@@ -300,7 +308,13 @@ const HomePage = () => {
       <AddFriendDialog
         isOpen={isAddFriendOpen}
         onOpenChange={setIsAddFriendOpen}
-        onAddFriend={handleAddFriend}
+        onRequestSent={fetchFriends}
+      />
+
+      <FriendProfileModal
+        isOpen={isFriendProfileOpen}
+        onOpenChange={setIsFriendProfileOpen}
+        friend={selectedFriend}
       />
     </div>
   );

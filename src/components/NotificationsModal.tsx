@@ -1,7 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Bell, Calendar, Clock, MessageCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Bell, Clock, Calendar, UserPlus } from "lucide-react";
 import { useAlarms } from "@/contexts/AlarmContext";
-import { useTasks } from "@/contexts/TaskContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import FriendRequestsModal from "@/components/FriendRequestsModal";
 
 interface NotificationsModalProps {
   open: boolean;
@@ -10,99 +18,154 @@ interface NotificationsModalProps {
 
 const NotificationsModal = ({ open, onOpenChange }: NotificationsModalProps) => {
   const { alarms } = useAlarms();
-  const { tasks } = useTasks();
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState<Array<{ title: string; subtitle: string | null; date: string }>>([]);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false);
+
+  // Buscar solicitações pendentes
+  const fetchPendingRequests = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('friendship_requests')
+      .select('id')
+      .eq('to_user_id', user.id)
+      .eq('status', 'pending');
+
+    if (error) {
+      console.error('Error fetching requests:', error);
+      return;
+    }
+
+    setPendingRequestsCount(data?.length || 0);
+  };
+
+  // Buscar tarefas próximas
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: true });
+      
+      if (error) {
+        console.error('Erro ao buscar tarefas:', error);
+        return;
+      }
+      
+      if (data) {
+        const today = new Date();
+        const next7Days = new Date();
+        next7Days.setDate(today.getDate() + 7);
+        
+        const upcoming = data.filter(task => {
+          const taskDate = new Date(task.date + 'T00:00:00');
+          return taskDate >= today && taskDate <= next7Days;
+        });
+        
+        setTasks(upcoming);
+      }
+    };
+
+    fetchTasks();
+    fetchPendingRequests();
+  }, [user, open]);
 
   // Filtrar alarmes ativos
   const activeAlarms = alarms.filter(alarm => alarm.isActive);
 
-  // Filtrar tarefas dos próximos 7 dias
-  const today = new Date();
-  const next7Days = new Date();
-  next7Days.setDate(today.getDate() + 7);
-  
-  const upcomingTasks = tasks.filter(task => {
-    const taskDate = new Date(task.date);
-    return taskDate >= today && taskDate <= next7Days;
-  }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center text-senior-lg">
-            <Bell className="mr-2" size={24} />
+          <DialogTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5" />
             Notificações
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+
+        <div className="space-y-3 max-h-[400px] overflow-y-auto">
+          {/* Solicitações de Amizade */}
+          {pendingRequestsCount > 0 && (
+            <div 
+              className="p-4 bg-blue-50 rounded-lg flex items-start gap-3 cursor-pointer hover:bg-blue-100 transition-colors"
+              onClick={() => {
+                setIsRequestsModalOpen(true);
+                onOpenChange(false);
+              }}
+            >
+              <UserPlus className="w-5 h-5 text-blue-600 mt-1" />
+              <div className="flex-1">
+                <h4 className="font-medium text-foreground">
+                  {pendingRequestsCount} {pendingRequestsCount === 1 ? 'Nova Solicitação' : 'Novas Solicitações'} de Amizade
+                </h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Toque para ver e responder
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Alarmes Ativos */}
           {activeAlarms.length > 0 && (
-            <div>
-              <h3 className="text-senior-base font-semibold mb-2 flex items-center">
-                <Clock className="mr-2" size={18} />
+            <div className="space-y-2">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Clock className="w-4 h-4" />
                 Alarmes Ativos ({activeAlarms.length})
               </h3>
-              <div className="space-y-2">
-                {activeAlarms.map((alarm) => (
-                  <div
-                    key={alarm.id}
-                    className="p-3 bg-primary/10 rounded-lg border border-primary/20"
-                  >
-                    <p className="font-semibold text-senior-base">{alarm.title}</p>
-                    <p className="text-sm text-muted-foreground">Horário: {alarm.time}</p>
-                  </div>
-                ))}
-              </div>
+              {activeAlarms.map((alarm) => (
+                <div
+                  key={alarm.id}
+                  className="p-3 bg-primary/10 rounded-lg border border-primary/20"
+                >
+                  <p className="font-medium">{alarm.title}</p>
+                  <p className="text-sm text-muted-foreground">Horário: {alarm.time}</p>
+                </div>
+              ))}
             </div>
           )}
 
           {/* Tarefas Próximas */}
-          {upcomingTasks.length > 0 && (
-            <div>
-              <h3 className="text-senior-base font-semibold mb-2 flex items-center">
-                <Calendar className="mr-2" size={18} />
-                Tarefas Próximas ({upcomingTasks.length})
+          {tasks.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Tarefas Próximas ({tasks.length})
               </h3>
-              <div className="space-y-2">
-                {upcomingTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 bg-secondary rounded-lg"
-                  >
-                    <p className="font-semibold text-senior-base">{task.title}</p>
+              {tasks.map((task) => (
+                <div
+                  key={task.title}
+                  className="p-3 bg-secondary/50 rounded-lg"
+                >
+                  <p className="font-medium">{task.title}</p>
+                  {task.subtitle && (
                     <p className="text-sm text-muted-foreground">{task.subtitle}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {new Date(task.date).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {new Date(task.date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Mensagens (placeholder) */}
-          <div>
-            <h3 className="text-senior-base font-semibold mb-2 flex items-center">
-              <MessageCircle className="mr-2" size={18} />
-              Mensagens
-            </h3>
-            <div className="p-3 bg-secondary rounded-lg text-center">
-              <p className="text-sm text-muted-foreground">Nenhuma mensagem nova</p>
-            </div>
-          </div>
-
-          {/* Vazio */}
-          {activeAlarms.length === 0 && upcomingTasks.length === 0 && (
-            <div className="text-center py-8">
-              <Bell className="mx-auto mb-2 text-muted-foreground" size={48} />
-              <p className="text-muted-foreground text-senior-base">
-                Nenhuma notificação no momento
-              </p>
-            </div>
+          {activeAlarms.length === 0 && tasks.length === 0 && pendingRequestsCount === 0 && (
+            <p className="text-center text-muted-foreground py-8">
+              Nenhuma notificação no momento
+            </p>
           )}
         </div>
       </DialogContent>
+
+      <FriendRequestsModal
+        isOpen={isRequestsModalOpen}
+        onOpenChange={setIsRequestsModalOpen}
+        onRequestHandled={fetchPendingRequests}
+      />
     </Dialog>
   );
 };

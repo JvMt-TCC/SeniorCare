@@ -43,30 +43,121 @@ export type Database = {
       }
       friends: {
         Row: {
-          avatar: string | null
           created_at: string
+          friend_user_id: string | null
           id: string
-          name: string
           user_id: string
         }
         Insert: {
-          avatar?: string | null
           created_at?: string
+          friend_user_id?: string | null
           id?: string
-          name: string
           user_id: string
         }
         Update: {
-          avatar?: string | null
           created_at?: string
+          friend_user_id?: string | null
           id?: string
-          name?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "friends_friend_user_id_fkey"
+            columns: ["friend_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friendship_requests: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          status: string
+          to_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          status?: string
+          to_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          status?: string
+          to_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friendship_requests_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendship_requests_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          from_user_id: string
+          id: string
+          read: boolean
+          to_user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          from_user_id: string
+          id?: string
+          read?: boolean
+          to_user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          read?: boolean
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
           created_at: string | null
           data_nascimento: string | null
           email: string
@@ -77,8 +168,11 @@ export type Database = {
           problemas_saude: Json | null
           telefone: string | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
           data_nascimento?: string | null
           email: string
@@ -89,8 +183,11 @@ export type Database = {
           problemas_saude?: Json | null
           telefone?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
           data_nascimento?: string | null
           email?: string
@@ -101,6 +198,7 @@ export type Database = {
           problemas_saude?: Json | null
           telefone?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
