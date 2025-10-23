@@ -1,18 +1,61 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Bell, Clock } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import FixedChat from "./FixedChat";
 import NotificationsModal from "./NotificationsModal";
 import AlarmModal from "./AlarmModal";
 import { Button } from "./ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAlarms } from "@/contexts/AlarmContext";
 
 interface MobileLayoutProps {
   children: ReactNode;
 }
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
+  const { user } = useAuth();
+  const { alarms } = useAlarms();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [alarmsOpen, setAlarmsOpen] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  // Verificar notificações não lidas
+  useEffect(() => {
+    const checkNotifications = async () => {
+      if (!user) return;
+
+      // Verificar pedidos de amizade pendentes
+      const { data: requests } = await supabase
+        .from('friendship_requests')
+        .select('id')
+        .eq('to_user_id', user.id)
+        .eq('status', 'pending');
+
+      const pendingCount = requests?.length || 0;
+      setPendingRequestsCount(pendingCount);
+
+      // Verificar se há alarmes ativos
+      const activeAlarms = alarms.filter(alarm => alarm.isActive).length;
+
+      // Mostrar badge se houver pedidos pendentes ou alarmes ativos
+      setHasNewNotifications(pendingCount > 0 || activeAlarms > 0);
+    };
+
+    checkNotifications();
+
+    // Verificar a cada 30 segundos
+    const interval = setInterval(checkNotifications, 30000);
+
+    return () => clearInterval(interval);
+  }, [user, alarms]);
+
+  // Resetar indicador quando abrir o modal de notificações
+  const handleOpenNotifications = () => {
+    setNotificationsOpen(true);
+    setHasNewNotifications(false);
+  };
 
   return (
     <div className="mobile-container">
@@ -30,10 +73,13 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setNotificationsOpen(true)}
+            onClick={handleOpenNotifications}
             className="relative"
           >
             <Bell size={24} />
+            {hasNewNotifications && (
+              <span className="absolute top-1 right-1 w-3 h-3 bg-destructive rounded-full border-2 border-background animate-pulse" />
+            )}
           </Button>
         </div>
       </div>

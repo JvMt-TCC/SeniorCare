@@ -18,7 +18,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
-  login: (email: string, password: string) => Promise<{ error?: string }>;
+  login: (username: string, password: string) => Promise<{ error?: string }>;
   signup: (signupData: SignupData) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -27,6 +27,7 @@ interface AuthContextType {
 
 interface SignupData {
   nome: string;
+  username: string;
   email: string;
   password: string;
   telefone?: string;
@@ -110,10 +111,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     try {
+      // Primeiro, buscar o email associado ao username
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('username', username)
+        .single();
+
+      if (profileError || !profileData) {
+        return { error: "Usuário não encontrado." };
+      }
+
+      // Depois, fazer login com o email encontrado
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: profileData.email,
         password,
       });
 
@@ -129,6 +142,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signup = async (signupData: SignupData) => {
     try {
+      // Verificar se o username já existe
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', signupData.username)
+        .maybeSingle();
+
+      if (existingUser) {
+        return { error: "Este nome de usuário já está em uso." };
+      }
+
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -138,6 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           emailRedirectTo: redirectUrl,
           data: {
             nome: signupData.nome,
+            username: signupData.username,
             telefone: signupData.telefone,
             endereco: signupData.endereco,
             data_nascimento: signupData.data_nascimento,

@@ -49,6 +49,7 @@ const CadastroPage = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -63,10 +64,29 @@ const CadastroPage = () => {
     e.preventDefault();
     
     // Validações
-    if (!formData.nome || !formData.email || !formData.password) {
+    if (!formData.nome || !formData.username || !formData.email || !formData.password) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validação de username
+    if (formData.username.length < 3 || formData.username.length > 30) {
+      toast({
+        title: "Erro",
+        description: "O nome de usuário deve ter entre 3 e 30 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(formData.username)) {
+      toast({
+        title: "Erro",
+        description: "O nome de usuário deve conter apenas letras, números, underscore ou hífen.",
         variant: "destructive",
       });
       return;
@@ -135,6 +155,7 @@ const CadastroPage = () => {
     
     const { error } = await signup({
       nome: formData.nome,
+      username: formData.username,
       email: formData.email,
       password: formData.password,
       telefone: formData.telefone || undefined,
@@ -212,20 +233,38 @@ const CadastroPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Nome *</label>
+                <Input
+                  type="text"
+                  value={formData.nome}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nome: e.target.value })
+                  }
+                  placeholder="Digite seu nome completo"
+                  className="text-senior-base"
+                  maxLength={100}
+                  required
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Nome *</label>
+                  <label className="block text-sm font-medium mb-2">Nome de Usuário *</label>
                   <Input
                     type="text"
-                    value={formData.nome}
+                    value={formData.username}
                     onChange={(e) =>
-                      setFormData({ ...formData, nome: e.target.value })
+                      setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') })
                     }
-                    placeholder="Digite seu nome completo"
+                    placeholder="nomedeusuario"
                     className="text-senior-base"
-                    maxLength={100}
+                    maxLength={30}
                     required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    3-30 caracteres: letras, números, _ ou -
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Email *</label>
