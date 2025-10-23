@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Eye, EyeOff, Check, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChangePasswordDialogProps {
   isOpen: boolean;
@@ -19,6 +21,8 @@ const ChangePasswordDialog = ({ isOpen, onOpenChange }: ChangePasswordDialogProp
     new: false,
     confirm: false
   });
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const passwordRequirements = [
     { test: (pass: string) => pass.length >= 8, text: "Mínimo 8 caracteres" },
@@ -27,16 +31,36 @@ const ChangePasswordDialog = ({ isOpen, onOpenChange }: ChangePasswordDialogProp
     { test: (pass: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pass), text: "1 caractere especial" }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const allRequirementsMet = passwordRequirements.every(req => req.test(passwords.newPassword));
     const passwordsMatch = passwords.newPassword === passwords.confirmPassword;
     
-    if (allRequirementsMet && passwordsMatch) {
-      // Simular alteração de senha
-      alert("Senha alterada com sucesso!");
+    if (!allRequirementsMet || !passwordsMatch) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwords.newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Senha alterada com sucesso!",
+        description: "Sua senha foi atualizada.",
+      });
+      
       setPasswords({ newPassword: "", confirmPassword: "" });
       onOpenChange(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao alterar senha",
+        description: error.message || "Ocorreu um erro ao tentar alterar sua senha.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,6 +98,7 @@ const ChangePasswordDialog = ({ isOpen, onOpenChange }: ChangePasswordDialogProp
                 onChange={(e) => handleChange("newPassword", e.target.value)}
                 className="h-12 text-base rounded-xl border-2 focus:border-primary pr-12"
                 required
+                disabled={loading}
               />
               <Button
                 type="button"
@@ -100,6 +125,7 @@ const ChangePasswordDialog = ({ isOpen, onOpenChange }: ChangePasswordDialogProp
                 onChange={(e) => handleChange("confirmPassword", e.target.value)}
                 className="h-12 text-base rounded-xl border-2 focus:border-primary pr-12"
                 required
+                disabled={loading}
               />
               <Button
                 type="button"
@@ -153,11 +179,12 @@ const ChangePasswordDialog = ({ isOpen, onOpenChange }: ChangePasswordDialogProp
               type="submit"
               className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90"
               disabled={
+                loading ||
                 !passwordRequirements.every(req => req.test(passwords.newPassword)) ||
                 passwords.newPassword !== passwords.confirmPassword
               }
             >
-              Alterar Senha
+              {loading ? "Alterando..." : "Alterar Senha"}
             </Button>
           </div>
         </form>

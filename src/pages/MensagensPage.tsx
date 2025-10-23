@@ -85,18 +85,35 @@ const MensagensPage = () => {
   const fetchMessages = async (friendId: string) => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .or(`and(from_user_id.eq.${user.id},to_user_id.eq.${friendId}),and(from_user_id.eq.${friendId},to_user_id.eq.${user.id})`)
-      .order('created_at', { ascending: true });
+    // Fetch messages in both directions without string interpolation
+    const [sentResult, receivedResult] = await Promise.all([
+      supabase
+        .from('messages')
+        .select('*')
+        .eq('from_user_id', user.id)
+        .eq('to_user_id', friendId),
+      supabase
+        .from('messages')
+        .select('*')
+        .eq('from_user_id', friendId)
+        .eq('to_user_id', user.id)
+    ]);
 
-    if (error) {
-      console.error('Error fetching messages:', error);
+    if (sentResult.error) {
+      console.error('Error fetching sent messages:', sentResult.error);
       return;
     }
 
-    setMessages(data || []);
+    if (receivedResult.error) {
+      console.error('Error fetching received messages:', receivedResult.error);
+      return;
+    }
+
+    // Combine and sort messages by timestamp
+    const allMessages = [...(sentResult.data || []), ...(receivedResult.data || [])]
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+    setMessages(allMessages);
 
     // Mark messages as read
     await supabase
