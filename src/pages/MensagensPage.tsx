@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 interface Friend {
   id: string;
@@ -24,8 +25,11 @@ interface Message {
   read: boolean;
 }
 
+const MAX_MESSAGE_LENGTH = 1000;
+
 const MensagensPage = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const userIdParam = searchParams.get('userId');
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
@@ -141,18 +145,35 @@ const MensagensPage = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedFriend || !user) return;
+    const trimmed = newMessage.trim();
+    
+    if (!trimmed || !selectedFriend || !user) return;
+
+    // Validate message length
+    if (trimmed.length > MAX_MESSAGE_LENGTH) {
+      toast({
+        title: "Mensagem muito longa",
+        description: `Máximo de ${MAX_MESSAGE_LENGTH} caracteres permitidos`,
+        variant: "destructive"
+      });
+      return;
+    }
 
     const { error } = await supabase
       .from('messages')
       .insert({
         from_user_id: user.id,
         to_user_id: selectedFriend.id,
-        content: newMessage.trim(),
+        content: trimmed,
       });
 
     if (error) {
       console.error('Error sending message:', error);
+      toast({
+        title: "Erro ao enviar",
+        description: "Não foi possível enviar a mensagem",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -215,14 +236,20 @@ const MensagensPage = () => {
 
         {/* Input de Mensagem - Fixo na parte inferior */}
         <div className="flex space-x-2 bg-background p-2 border-t border-border flex-shrink-0">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Digite sua mensagem..."
-            className="flex-1 p-3 border border-border rounded-xl bg-background text-senior-base"
-          />
+          <div className="flex-1">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="Digite sua mensagem..."
+              maxLength={MAX_MESSAGE_LENGTH}
+              className="w-full p-3 border border-border rounded-xl bg-background text-senior-base"
+            />
+            <p className="text-xs text-muted-foreground mt-1 px-1">
+              {newMessage.length}/{MAX_MESSAGE_LENGTH}
+            </p>
+          </div>
           <button
             onClick={handleSendMessage}
             className="btn-primary px-4 flex-shrink-0"

@@ -232,42 +232,6 @@ export type Database = {
         }
         Relationships: []
       }
-      User: {
-        Row: {
-          Dt_nascimento: string | null
-          "E-mail": string | null
-          Endereço: string | null
-          id: number
-          Lazer: Json | null
-          Nome: string
-          Numero: number | null
-          Problema_Saude: Json | null
-          Senha: string | null
-        }
-        Insert: {
-          Dt_nascimento?: string | null
-          "E-mail"?: string | null
-          Endereço?: string | null
-          id?: number
-          Lazer?: Json | null
-          Nome: string
-          Numero?: number | null
-          Problema_Saude?: Json | null
-          Senha?: string | null
-        }
-        Update: {
-          Dt_nascimento?: string | null
-          "E-mail"?: string | null
-          Endereço?: string | null
-          id?: number
-          Lazer?: Json | null
-          Nome?: string
-          Numero?: number | null
-          Problema_Saude?: Json | null
-          Senha?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
