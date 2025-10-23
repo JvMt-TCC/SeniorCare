@@ -72,6 +72,34 @@ const CadastroPage = () => {
       return;
     }
 
+    // Validação de comprimento dos campos
+    if (formData.nome.length > 100) {
+      toast({
+        title: "Erro",
+        description: "O nome deve ter no máximo 100 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.email.length > 255) {
+      toast({
+        title: "Erro",
+        description: "O email deve ter no máximo 255 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.endereco && formData.endereco.length > 200) {
+      toast({
+        title: "Erro",
+        description: "O endereço deve ter no máximo 200 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Erro",
@@ -195,6 +223,7 @@ const CadastroPage = () => {
                     }
                     placeholder="Digite seu nome completo"
                     className="text-senior-base"
+                    maxLength={100}
                     required
                   />
                 </div>
@@ -208,6 +237,7 @@ const CadastroPage = () => {
                     }
                     placeholder="Digite seu email"
                     className="text-senior-base"
+                    maxLength={255}
                     required
                   />
                 </div>
@@ -283,6 +313,7 @@ const CadastroPage = () => {
                   }
                   placeholder="Digite seu endereço completo"
                   className="text-senior-base"
+                  maxLength={200}
                 />
               </div>
 
