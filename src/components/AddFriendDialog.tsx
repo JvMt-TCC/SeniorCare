@@ -24,9 +24,40 @@ const AddFriendDialog = ({ isOpen, onOpenChange, onRequestSent }: AddFriendDialo
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const validateUsername = (value: string): string | null => {
+    const trimmed = value.trim();
+    
+    if (!trimmed) {
+      return "Nome de usuário não pode estar vazio";
+    }
+    
+    if (trimmed.length < 3) {
+      return "Nome de usuário deve ter pelo menos 3 caracteres";
+    }
+    
+    if (trimmed.length > 30) {
+      return "Nome de usuário deve ter no máximo 30 caracteres";
+    }
+    
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+      return "Nome de usuário deve conter apenas letras, números, underscore ou hífen";
+    }
+    
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) return;
+    
+    const validationError = validateUsername(username);
+    if (validationError) {
+      toast({
+        title: "Entrada inválida",
+        description: validationError,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -121,7 +152,11 @@ const AddFriendDialog = ({ isOpen, onOpenChange, onRequestSent }: AddFriendDialo
               placeholder="@nomedousuario"
               className="w-full"
               disabled={loading}
+              maxLength={30}
             />
+            <p className="text-xs text-muted-foreground">
+              3-30 caracteres: letras, números, _ ou -
+            </p>
           </div>
           <div className="flex justify-end space-x-2">
             <Button
