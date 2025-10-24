@@ -1,35 +1,137 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Bot, Send, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+type Message = {
+  id: number;
+  text: string;
+  sender: "user" | "bot";
+  time: string;
+};
 
 const FixedChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Olá! Como posso ajudar você hoje?", sender: "bot", time: "14:30" },
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 1, text: "Qual dúvida posso tirar pra você hoje?", sender: "bot", time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const streamChat = async (userMessages: Message[]) => {
+    setIsLoading(true);
+    
+    try {
+      const CHAT_URL = `https://alxuaxrykccielfsmyye.supabase.co/functions/v1/chat`;
+      
+      const response = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabase.auth.getSession().then(s => s.data.session?.access_token || '')}`,
+        },
+        body: JSON.stringify({
+          messages: userMessages.map(msg => ({
+            role: msg.sender === "user" ? "user" : "assistant",
+            content: msg.text
+          }))
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("Falha ao conectar com o assistente");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let streamDone = false;
+      let assistantMessage = "";
+
+      // Create initial assistant message
+      const assistantMsgId = Date.now();
+      setMessages(prev => [...prev, {
+        id: assistantMsgId,
+        text: "",
+        sender: "bot",
+        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      }]);
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantMessage += content;
+              setMessages(prev => 
+                prev.map(msg => 
+                  msg.id === assistantMsgId 
+                    ? { ...msg, text: assistantMessage }
+                    : msg
+                )
+              );
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Erro no chat:", error);
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        text: "Desculpe, ocorreu um erro. Tente novamente.",
+        sender: "bot",
+        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSendMessage = () => {
-    if (message.trim()) {
-      const newMessage = {
+    if (message.trim() && !isLoading) {
+      const newMessage: Message = {
         id: Date.now(),
         text: message.trim(),
         sender: "user",
         time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       };
       
-      setMessages(prev => [...prev, newMessage]);
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
       setMessage("");
       
-      // Simular resposta automática
-      setTimeout(() => {
-        const botResponse = {
-          id: Date.now() + 1,
-          text: "Obrigado pela sua mensagem! Nossa equipe entrará em contato em breve.",
-          sender: "bot",
-          time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, botResponse]);
-      }, 1000);
+      streamChat(updatedMessages);
     }
   };
 
@@ -76,7 +178,7 @@ const FixedChat = () => {
                     }
                   `}
                 >
-                  <p>{msg.text}</p>
+                  <p className="whitespace-pre-wrap">{msg.text}</p>
                   <p className={`text-xs mt-1 ${
                     msg.sender === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                   }`}>
@@ -85,6 +187,14 @@ const FixedChat = () => {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-secondary text-foreground max-w-xs p-3 rounded-2xl text-sm">
+                  <p>Digitando...</p>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
@@ -100,7 +210,8 @@ const FixedChat = () => {
               />
               <button
                 onClick={handleSendMessage}
-                className="btn-primary px-3 py-2"
+                disabled={isLoading}
+                className="btn-primary px-3 py-2 disabled:opacity-50"
               >
                 <Send size={16} />
               </button>

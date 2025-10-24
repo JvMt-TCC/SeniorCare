@@ -14,11 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      event_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           created_at: string
           event_id: number
           id: string
+          is_volunteer: boolean
           status: string | null
           updated_at: string
           user_id: string
@@ -27,6 +46,7 @@ export type Database = {
           created_at?: string
           event_id: number
           id?: string
+          is_volunteer?: boolean
           status?: string | null
           updated_at?: string
           user_id: string
@@ -35,9 +55,43 @@ export type Database = {
           created_at?: string
           event_id?: number
           id?: string
+          is_volunteer?: boolean
           status?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          categories: string[]
+          created_at: string
+          date: string
+          description: string
+          id: string
+          image: string | null
+          location: string
+          title: string
+        }
+        Insert: {
+          categories?: string[]
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          image?: string | null
+          location: string
+          title: string
+        }
+        Update: {
+          categories?: string[]
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          image?: string | null
+          location?: string
+          title?: string
         }
         Relationships: []
       }
@@ -112,6 +166,51 @@ export type Database = {
           },
         ]
       }
+      health_locations: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          hours: string | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          neighborhood: string
+          phone: string | null
+          services: string[] | null
+          type: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          hours?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          neighborhood: string
+          phone?: string | null
+          services?: string[] | null
+          type: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          hours?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          neighborhood?: string
+          phone?: string | null
+          services?: string[] | null
+          type?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -168,6 +267,7 @@ export type Database = {
           problemas_saude: Json | null
           telefone: string | null
           updated_at: string | null
+          user_type: Database["public"]["Enums"]["user_type"]
           username: string | null
         }
         Insert: {
@@ -183,6 +283,7 @@ export type Database = {
           problemas_saude?: Json | null
           telefone?: string | null
           updated_at?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           username?: string | null
         }
         Update: {
@@ -198,6 +299,7 @@ export type Database = {
           problemas_saude?: Json | null
           telefone?: string | null
           updated_at?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           username?: string | null
         }
         Relationships: []
@@ -232,6 +334,90 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_chat_messages: {
+        Row: {
+          chat_id: string
+          content: string
+          created_at: string
+          from_user_id: string
+          id: string
+          read: boolean
+        }
+        Insert: {
+          chat_id: string
+          content: string
+          created_at?: string
+          from_user_id: string
+          id?: string
+          read?: boolean
+        }
+        Update: {
+          chat_id?: string
+          content?: string
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          read?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_chat_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_chat_messages_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_chats: {
+        Row: {
+          created_at: string
+          elder_id: string
+          id: string
+          status: string
+          updated_at: string
+          volunteer_id: string
+        }
+        Insert: {
+          created_at?: string
+          elder_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          volunteer_id: string
+        }
+        Update: {
+          created_at?: string
+          elder_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_chats_elder_id_fkey"
+            columns: ["elder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_chats_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -240,7 +426,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "idoso" | "voluntario"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -367,6 +553,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["idoso", "voluntario"],
+    },
   },
 } as const
