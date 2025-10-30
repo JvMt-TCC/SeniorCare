@@ -1,10 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pill, MapPin, ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import VolunteerChatButton from "@/components/VolunteerChatButton";
+import ElderVolunteerButton from "@/components/ElderVolunteerButton";
 
 const SaudePage = () => {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const [healthLocations, setHealthLocations] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchHealthLocations = async () => {
+      const { data, error } = await supabase
+        .from('health_locations')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar locais:', error);
+        return;
+      }
+
+      if (data) {
+        setHealthLocations(data);
+      }
+    };
+
+    fetchHealthLocations();
+  }, []);
 
   const medicationCategories = [
     { id: 1, name: "Dores Musculares", icon: "💪" },
@@ -19,44 +45,6 @@ const SaudePage = () => {
     { id: 10, name: "Gripe e Resfriado", icon: "🤧" },
   ];
 
-  const healthLocations = [
-    {
-      id: 1,
-      name: "Hospital Municipal de Niterói",
-      type: "Hospital",
-      address: "Rua Coronel Gomes Machado, s/nº - Centro",
-      coordinates: { lat: -22.8833, lng: -43.1036 }
-    },
-    {
-      id: 2,
-      name: "Policlínica Regional de Icaraí",
-      type: "Policlínica",
-      address: "Rua Coronel Moreira César, 229 - Icaraí",
-      coordinates: { lat: -22.9001, lng: -43.1005 }
-    },
-    {
-      id: 3,
-      name: "Posto de Saúde Engenhoca",
-      type: "Posto de Saúde",
-      address: "Rua Dr. João Luiz Alves, 150 - Engenhoca",
-      coordinates: { lat: -22.8964, lng: -43.1066 }
-    },
-    {
-      id: 4,
-      name: "UPA - Fonseca",
-      type: "UPA",
-      address: "Av. Jansen de Mello, s/nº - Fonseca",
-      coordinates: { lat: -22.8912, lng: -43.1155 }
-    },
-    {
-      id: 5,
-      name: "Hospital Universitário Antônio Pedro",
-      type: "Hospital",
-      address: "Rua Marquês do Paraná, 303 - Centro",
-      coordinates: { lat: -22.9007, lng: -43.105 }
-    },
-  ];
-
   return (
     <div className="space-y-6 py-6">
       <div>
@@ -65,6 +53,10 @@ const SaudePage = () => {
           Informações sobre medicamentos e locais de cuidado
         </p>
       </div>
+
+      {/* Botão específico baseado no tipo de usuário */}
+      {profile?.user_type === 'voluntario' && <VolunteerChatButton />}
+      {profile?.user_type === 'idoso' && <ElderVolunteerButton />}
 
       {/* Seção Medicamentos */}
       <div>

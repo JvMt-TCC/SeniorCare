@@ -36,92 +36,37 @@ interface Event {
 }
 
 const SugestoesPage = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [registrations, setRegistrations] = useState<number[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchRegistrations = async () => {
-      if (!user) return;
+  const categories = [
+    "Arte", "Dança", "Música", "Saúde", "Esportes", "Cultura", 
+    "Gastronomia", "Natureza", "Entretenimento", "Artesanato"
+  ];
 
-      const { data, error } = await supabase
-        .from('event_registrations')
-        .select('event_id')
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Erro ao buscar registros:', error);
-        return;
-      }
-
-      if (data) {
-        setRegistrations(data.map(r => r.event_id));
-      }
-    };
-
-    fetchRegistrations();
-  }, [user]);
-
-  const handleRegister = async (eventId: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!user) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para se inscrever.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (registrations.includes(eventId)) {
-      // Cancelar inscrição
-      const { error } = await supabase
-        .from('event_registrations')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('event_id', eventId);
-
-      if (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível cancelar a inscrição.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setRegistrations(prev => prev.filter(id => id !== eventId));
-      toast({
-        title: "Sucesso",
-        description: "Inscrição cancelada!",
-      });
-    } else {
-      // Registrar
-      const { error } = await supabase
-        .from('event_registrations')
-        .insert([{ 
-          user_id: user.id, 
-          event_id: eventId,
-          status: 'registrado'
-        }]);
-
-      if (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível fazer a inscrição.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setRegistrations(prev => [...prev, eventId]);
-      toast({
-        title: "Sucesso",
-        description: "Inscrição realizada com sucesso!",
-      });
-    }
+  const eventCategories: Record<number, string[]> = {
+    1: ["Dança", "Entretenimento"],
+    2: ["Arte", "Cultura"],
+    3: ["Saúde", "Esportes"],
+    4: ["Música", "Cultura"],
+    5: ["Gastronomia", "Saúde"],
+    6: ["Saúde"],
+    7: ["Natureza", "Esportes"],
+    8: ["Cultura", "Arte"],
+    9: ["Saúde", "Esportes"],
+    10: ["Gastronomia", "Entretenimento"],
+    11: ["Arte", "Cultura"],
+    12: ["Música", "Dança"],
+    13: ["Arte", "Cultura"],
+    14: ["Entretenimento", "Cultura"],
+    15: ["Gastronomia", "Cultura"],
+    16: ["Entretenimento", "Arte"],
+    17: ["Cultura", "Natureza"],
+    18: ["Dança", "Música"],
+    19: ["Artesanato", "Cultura"],
+    20: ["Entretenimento", "Cultura"],
   };
 
   const events: Event[] = [
@@ -306,6 +251,105 @@ const SugestoesPage = () => {
     },
   ];
 
+  useEffect(() => {
+    const fetchRegistrations = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('event_id')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Erro ao buscar registros:', error);
+        return;
+      }
+
+      if (data) {
+        setRegistrations(data.map(r => r.event_id));
+      }
+    };
+
+    fetchRegistrations();
+  }, [user]);
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const filteredEvents = selectedCategories.length === 0
+    ? events
+    : events.filter(event =>
+        eventCategories[event.id]?.some(cat => selectedCategories.includes(cat))
+      );
+
+  const handleRegister = async (eventId: number, e: React.MouseEvent, isVolunteer = false) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para se inscrever.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (registrations.includes(eventId)) {
+      // Cancelar inscrição
+      const { error } = await supabase
+        .from('event_registrations')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('event_id', eventId);
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível cancelar a inscrição.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setRegistrations(prev => prev.filter(id => id !== eventId));
+      toast({
+        title: "Sucesso",
+        description: "Inscrição cancelada!",
+      });
+    } else {
+      // Registrar
+      const { error } = await supabase
+        .from('event_registrations')
+        .insert([{ 
+          user_id: user.id, 
+          event_id: eventId,
+          status: 'registrado',
+          is_volunteer: isVolunteer
+        }]);
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível fazer a inscrição.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setRegistrations(prev => [...prev, eventId]);
+      toast({
+        title: "Sucesso",
+        description: isVolunteer ? "Voluntariado registrado com sucesso!" : "Inscrição realizada com sucesso!",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 fade-in">
       <div className="text-center pt-4">
@@ -317,8 +361,36 @@ const SugestoesPage = () => {
         </p>
       </div>
 
+      {/* Filtro de Categorias */}
+      <div className="card-soft">
+        <h3 className="text-senior-base font-semibold mb-3">Filtrar por Categoria</h3>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => toggleCategory(category)}
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                selectedCategories.includes(category)
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-foreground hover:bg-primary/20'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+        {selectedCategories.length > 0 && (
+          <button
+            onClick={() => setSelectedCategories([])}
+            className="text-sm text-primary mt-3 underline"
+          >
+            Limpar filtros
+          </button>
+        )}
+      </div>
+
       <div className="space-y-4">
-        {events.map((event, index) => (
+        {filteredEvents.map((event, index) => (
           <Link
             key={event.id}
             to={`/evento/${event.id}`}
@@ -353,24 +425,36 @@ const SugestoesPage = () => {
                     <span className="line-clamp-1">{event.location}</span>
                   </div>
                 </div>
-                <Button
-                  onClick={(e) => handleRegister(event.id, e)}
-                  variant={registrations.includes(event.id) ? "default" : "outline"}
-                  size="sm"
-                  className="mt-2 touch-target"
-                >
-                  {registrations.includes(event.id) ? (
-                    <>
-                      <Check size={16} className="mr-1" />
-                      Inscrito
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={16} className="mr-1" />
-                      Inscrever
-                    </>
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    onClick={(e) => handleRegister(event.id, e, false)}
+                    variant={registrations.includes(event.id) ? "default" : "outline"}
+                    size="sm"
+                    className="touch-target flex-1"
+                  >
+                    {registrations.includes(event.id) ? (
+                      <>
+                        <Check size={16} className="mr-1" />
+                        Inscrito
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={16} className="mr-1" />
+                        Inscrever
+                      </>
+                    )}
+                  </Button>
+                  {profile?.user_type === 'voluntario' && (
+                    <Button
+                      onClick={(e) => handleRegister(event.id, e, true)}
+                      variant="secondary"
+                      size="sm"
+                      className="touch-target"
+                    >
+                      Se Voluntariar
+                    </Button>
                   )}
-                </Button>
+                </div>
               </div>
             </div>
           </Link>

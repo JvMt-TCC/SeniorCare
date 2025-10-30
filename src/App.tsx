@@ -18,6 +18,10 @@ import CadastroPage from "./pages/CadastroPage";
 import PrivacyTermsPage from "./pages/PrivacyTermsPage";
 import MobileLayout from "./components/MobileLayout";
 import NotFound from "./pages/NotFound";
+import AjudaAmigoPage from "./pages/AjudaAmigoPage";
+import VoluntariosPage from "./pages/VoluntariosPage";
+import VolunteerChatPage from "./pages/VolunteerChatPage";
+import ElderChatPage from "./pages/ElderChatPage";
 import { TaskProvider } from "./contexts/TaskContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AlarmProvider } from "./contexts/AlarmContext";
@@ -58,6 +62,10 @@ const AppContent = () => {
         <Route path="/saude" element={<SaudePage />} />
         <Route path="/saude/medicamentos/:id" element={<MedicamentoDetailPage />} />
         <Route path="/saude/locais/:id" element={<LocalCuidadoDetailPage />} />
+        <Route path="/saude/ajuda-amigo" element={<AjudaAmigoPage />} />
+        <Route path="/saude/voluntarios" element={<VoluntariosPage />} />
+        <Route path="/chat/voluntario/:chatId" element={<VolunteerChatPage />} />
+        <Route path="/chat/idoso/:chatId" element={<ElderChatPage />} />
         <Route path="/mensagens" element={<MensagensPage />} />
         <Route path="/perfil" element={<PerfilPage />} />
         <Route path="/privacy-terms" element={<PrivacyTermsPage />} />

@@ -345,6 +345,44 @@ const CadastroPage = () => {
               </div>
 
               <div>
+                <label className="block text-sm font-medium mb-3">Tipo de Usuário *</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div
+                    onClick={() => setFormData({ ...formData, userType: 'idoso' })}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      formData.userType === 'idoso'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">👴</div>
+                      <p className="font-semibold">Idoso</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Participar de eventos e atividades
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    onClick={() => setFormData({ ...formData, userType: 'voluntario' })}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      formData.userType === 'voluntario'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🤝</div>
+                      <p className="font-semibold">Voluntário</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Ajudar na organização de eventos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium mb-2">Endereço</label>
                 <Input
                   type="text"

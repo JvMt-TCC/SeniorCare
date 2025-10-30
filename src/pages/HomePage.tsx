@@ -134,7 +134,18 @@ const HomePage = () => {
       <div className="card-primary slide-up">
         <h2 className="text-senior-lg mb-3">Frase do Dia</h2>
         <p className="text-senior-base opacity-90">
-          "A idade não é medida pelos anos vividos, mas pela sabedoria adquirida e pelos sorrisos compartilhados."
+          {[
+            "A idade não é medida pelos anos vividos, mas pela sabedoria adquirida e pelos sorrisos compartilhados.",
+            "Cada dia é uma nova oportunidade para aprender, crescer e fazer a diferença.",
+            "A experiência é o melhor professor e a paciência, a melhor virtude.",
+            "Nunca é tarde para ser aquilo que você sempre quis ser.",
+            "A vida começa no fim da sua zona de conforto.",
+            "Envelhecer é um privilégio, e sabedoria é o prêmio.",
+            "Os melhores momentos da vida são aqueles compartilhados com quem amamos.",
+            "Cada ruga conta uma história de risadas e experiências vividas.",
+            "A idade traz sabedoria, e a sabedoria traz paz interior.",
+            "Hoje é o dia perfeito para fazer algo que você ama."
+          ][Math.floor(Math.random() * 10)]}
         </p>
       </div>
 
