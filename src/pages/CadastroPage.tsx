@@ -57,7 +57,8 @@ const CadastroPage = () => {
     endereco: "",
     data_nascimento: "",
     problemas_saude: [] as string[],
-    gostos_lazer: [] as string[]
+    gostos_lazer: [] as string[],
+    userType: "idoso" as "idoso" | "voluntario"
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +163,8 @@ const CadastroPage = () => {
       endereco: formData.endereco || undefined,
       data_nascimento: formData.data_nascimento || undefined,
       problemas_saude: formData.problemas_saude,
-      gostos_lazer: formData.gostos_lazer
+      gostos_lazer: formData.gostos_lazer,
+      user_type: formData.userType
     });
     
     if (error) {
