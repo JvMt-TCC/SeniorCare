@@ -32,18 +32,6 @@ const SaudePage = () => {
     fetchHealthLocations();
   }, []);
 
-  const medicationCategories = [
-    { id: 1, name: "Dores Musculares", icon: "💪" },
-    { id: 2, name: "Dores de Cabeça", icon: "🤕" },
-    { id: 3, name: "Cãibras", icon: "🦵" },
-    { id: 4, name: "Dores nas Costas", icon: "🔙" },
-    { id: 5, name: "Artrite/Artrose", icon: "🦴" },
-    { id: 6, name: "Pressão Alta", icon: "❤️" },
-    { id: 7, name: "Diabetes", icon: "🩸" },
-    { id: 8, name: "Insônia", icon: "😴" },
-    { id: 9, name: "Ansiedade", icon: "😰" },
-    { id: 10, name: "Gripe e Resfriado", icon: "🤧" },
-  ];
 
   return (
     <div className="space-y-6 py-6">
@@ -59,51 +47,71 @@ const SaudePage = () => {
       {profile?.user_type === 'idoso' && <ElderVolunteerButton />}
 
       {/* Seção Medicamentos */}
-      <div>
-        <h2 className="text-senior-xl text-primary mb-4 flex items-center">
-          <Pill className="mr-2" size={24} />
-          Medicamentos
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          {medicationCategories.map((category) => (
-            <Card
-              key={category.id}
-              className="card-soft cursor-pointer hover:bg-primary/5 transition-colors"
-              onClick={() => navigate(`/saude/medicamentos/${category.id}`, { state: { category } })}
-            >
-              <div className="text-center p-4">
-                <div className="text-4xl mb-2">{category.icon}</div>
-                <p className="text-senior-base font-semibold">{category.name}</p>
-              </div>
-            </Card>
-          ))}
+      <Card
+        className="card-soft cursor-pointer hover:bg-primary/5 transition-colors"
+        onClick={() => navigate('/saude/medicamentos', { state: { conditions: profile?.problemas_saude || [] } })}
+      >
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-4">
+            <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+              <Pill className="text-blue-600 dark:text-blue-300" size={24} />
+            </div>
+            <div>
+              <p className="text-senior-base font-semibold">Medicamentos</p>
+              <p className="text-sm text-muted-foreground">
+                Encontre medicamentos recomendados
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="text-muted-foreground" size={24} />
         </div>
-      </div>
+      </Card>
 
       {/* Seção Locais de Cuidado */}
-      <div>
-        <h2 className="text-senior-xl text-primary mb-4 flex items-center">
-          <MapPin className="mr-2" size={24} />
-          Locais de Cuidado
-        </h2>
-        <div className="space-y-3">
-          {healthLocations.map((location) => (
-            <Card
-              key={location.id}
-              className="card-soft cursor-pointer hover:bg-primary/5 transition-colors"
-              onClick={() => navigate(`/saude/locais/${location.id}`, { state: { location } })}
-            >
-              <div className="flex items-center justify-between p-4">
-                <div className="flex-1">
-                  <p className="text-senior-base font-semibold">{location.name}</p>
-                  <p className="text-sm text-muted-foreground">{location.type}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{location.address}</p>
-                </div>
-                <ChevronRight className="text-muted-foreground" size={24} />
-              </div>
-            </Card>
-          ))}
+      <Card
+        className="card-soft cursor-pointer hover:bg-primary/5 transition-colors"
+        onClick={() => navigate('/saude/locais')}
+      >
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-4">
+            <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
+              <MapPin className="text-green-600 dark:text-green-300" size={24} />
+            </div>
+            <div>
+              <p className="text-senior-base font-semibold">Locais de Cuidado</p>
+              <p className="text-sm text-muted-foreground">
+                Encontre hospitais e clínicas próximas
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="text-muted-foreground" size={24} />
         </div>
+      </Card>
+
+      <div className="card-soft">
+        <h3 className="text-senior-lg text-primary mb-4">Dicas de Saúde</h3>
+        <ul className="space-y-3 text-muted-foreground">
+          <li className="flex items-start">
+            <span className="text-primary mr-2">•</span>
+            <span>Beba pelo menos 8 copos de água por dia</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-primary mr-2">•</span>
+            <span>Faça caminhadas leves de 30 minutos diariamente</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-primary mr-2">•</span>
+            <span>Mantenha uma alimentação balanceada com frutas e verduras</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-primary mr-2">•</span>
+            <span>Durma de 7 a 8 horas por noite</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-primary mr-2">•</span>
+            <span>Realize check-ups médicos regulares</span>
+          </li>
+        </ul>
       </div>
     </div>
   );

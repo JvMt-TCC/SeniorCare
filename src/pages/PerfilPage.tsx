@@ -22,11 +22,7 @@ const PerfilPage = () => {
     joined: "Janeiro 2024"
   };
 
-  const stats = [
-    { label: "Eventos Participados", value: "12" },
-    { label: "Amigos", value: "25" },
-    { label: "Tarefas Concluídas", value: "48" }
-  ];
+  // Stats removed - no pre-defined data
 
   const handleLogout = async () => {
     await logout();
@@ -59,15 +55,6 @@ const PerfilPage = () => {
         <h2 className="text-senior-xl text-primary mb-2">{userInfo.name}</h2>
       </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-3 gap-3 slide-up">
-        {stats.map((stat, index) => (
-          <div key={index} className="card-soft text-center">
-            <p className="text-2xl font-bold text-primary mb-1">{stat.value}</p>
-            <p className="text-sm text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
-      </div>
 
       {/* Informações de contato */}
       <div className="card-soft slide-up">

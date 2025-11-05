@@ -13,6 +13,8 @@ import MeusEventosPage from "./pages/MeusEventosPage";
 import SaudePage from "./pages/SaudePage";
 import MedicamentoDetailPage from "./pages/MedicamentoDetailPage";
 import LocalCuidadoDetailPage from "./pages/LocalCuidadoDetailPage";
+import MedicamentosPage from "./pages/MedicamentosPage";
+import LocaisCuidadoPage from "./pages/LocaisCuidadoPage";
 import LoginPage from "./pages/LoginPage";
 import CadastroPage from "./pages/CadastroPage";
 import PrivacyTermsPage from "./pages/PrivacyTermsPage";
@@ -60,7 +62,9 @@ const AppContent = () => {
         <Route path="/calendario" element={<CalendarioPage />} />
         <Route path="/meus-eventos" element={<MeusEventosPage />} />
         <Route path="/saude" element={<SaudePage />} />
+        <Route path="/saude/medicamentos" element={<MedicamentosPage />} />
         <Route path="/saude/medicamentos/:id" element={<MedicamentoDetailPage />} />
+        <Route path="/saude/locais" element={<LocaisCuidadoPage />} />
         <Route path="/saude/locais/:id" element={<LocalCuidadoDetailPage />} />
         <Route path="/saude/ajuda-amigo" element={<AjudaAmigoPage />} />
         <Route path="/saude/voluntarios" element={<VoluntariosPage />} />
