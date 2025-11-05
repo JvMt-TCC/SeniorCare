@@ -53,7 +53,7 @@ const ElderChatPage = () => {
           description: "Chat não encontrado.",
           variant: "destructive",
         });
-        navigate('/saude');
+        navigate('/saude/voluntarios');
         return;
       }
 
@@ -147,7 +147,7 @@ const ElderChatPage = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/saude')}
+          onClick={() => navigate('/saude/voluntarios')}
         >
           <ArrowLeft size={24} />
         </Button>
