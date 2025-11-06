@@ -10,7 +10,7 @@ import {
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import Logo from "../images/Logo.jpg";
+import Logo from "../images/SeniorCareLogo.png";
 
 const LoginPage = () => {
   const { login } = useAuth();

@@ -65,11 +65,11 @@ const AddFriendDialog = ({ isOpen, onOpenChange, onRequestSent }: AddFriendDialo
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
 
-      // Search for user by username
+      // Search for user by username (case-insensitive)
       const { data: targetUser, error: searchError } = await supabase
         .from("profiles")
         .select("id, username, nome")
-        .eq("username", username.trim())
+        .ilike("username", username.trim())
         .single();
 
       if (searchError || !targetUser) {
