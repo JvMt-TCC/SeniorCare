@@ -115,11 +115,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      // Primeiro, buscar o email associado ao username
+      // Primeiro, buscar o email associado ao username (case-insensitive)
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('email')
-        .eq('username', username)
+        .ilike('username', username.trim())
         .single();
 
       if (profileError || !profileData) {
