@@ -80,18 +80,16 @@ const FriendRequestsModal = ({ isOpen, onOpenChange, onRequestHandled }: FriendR
 
       if (updateError) throw updateError;
 
-      // If accepted, create friendship
+      // If accepted, create friendship (bidirectional)
       if (action === "accepted") {
         const { error: friendError } = await supabase
           .from("friends")
-          .insert({ user_id: user.id, friend_user_id: fromUserId });
+          .insert([
+            { user_id: user.id, friend_user_id: fromUserId },
+            { user_id: fromUserId, friend_user_id: user.id }
+          ]);
 
         if (friendError) throw friendError;
-
-        // Also create reverse friendship
-        await supabase
-          .from("friends")
-          .insert({ user_id: fromUserId, friend_user_id: user.id });
       }
 
       toast({

@@ -132,20 +132,24 @@ const MensagensPage = () => {
     if (selectedFriend) {
       fetchMessages(selectedFriend.id);
 
-      // Subscribe to new messages
+      // Subscribe to new messages (sent or received)
       const channel = supabase
-        .channel('messages')
+        .channel(`messages-${selectedFriend.id}`)
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'messages',
-            filter: `to_user_id=eq.${user?.id}`,
+            table: 'messages'
           },
           (payload) => {
-            if (payload.new.from_user_id === selectedFriend.id) {
-              setMessages((prev) => [...prev, payload.new as Message]);
+            const msg = payload.new as Message;
+            // Only add if it's part of this conversation
+            if (
+              (msg.from_user_id === user?.id && msg.to_user_id === selectedFriend.id) ||
+              (msg.from_user_id === selectedFriend.id && msg.to_user_id === user?.id)
+            ) {
+              setMessages((prev) => [...prev, msg]);
             }
           }
         )
