@@ -15,24 +15,51 @@ const LocaisCuidadoPage = () => {
 
   useEffect(() => {
     const fetchHealthLocations = async () => {
-      const userCity = profile?.endereco?.includes('São Gonçalo') ? 'São Gonçalo' : 'Niterói';
-      
       const { data, error } = await supabase
         .from('health_locations')
         .select('*')
-        .eq('city', userCity)
         .order('name');
 
       if (error) {
         console.error('Erro ao buscar locais de saúde:', error);
-      } else {
-        setHealthLocations(data || []);
+      } else if (data) {
+        // Calcular distância e ordenar por proximidade se o usuário tiver coordenadas
+        if (profile?.latitude && profile?.longitude) {
+          const locationsWithDistance = data.map(loc => ({
+            ...loc,
+            distance: calculateDistance(
+              Number(profile.latitude),
+              Number(profile.longitude),
+              Number(loc.latitude),
+              Number(loc.longitude)
+            )
+          }));
+          
+          // Ordenar por distância
+          locationsWithDistance.sort((a, b) => a.distance - b.distance);
+          setHealthLocations(locationsWithDistance);
+        } else {
+          setHealthLocations(data);
+        }
       }
       setLoading(false);
     };
 
     fetchHealthLocations();
   }, [profile]);
+
+  // Função para calcular distância entre dois pontos usando Haversine
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Raio da Terra em km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distância em km
+  };
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -57,7 +84,9 @@ const LocaisCuidadoPage = () => {
         <div className="ml-4">
           <h1 className="text-senior-lg text-primary">Locais de Cuidado</h1>
           <p className="text-sm text-muted-foreground">
-            {profile?.endereco?.includes('São Gonçalo') ? 'São Gonçalo' : 'Niterói'}
+            {profile?.latitude && profile?.longitude 
+              ? 'Ordenados por proximidade' 
+              : profile?.cidade || 'Todos os locais'}
           </p>
         </div>
       </div>
@@ -96,6 +125,11 @@ const LocaisCuidadoPage = () => {
                     <p className="text-senior-base font-semibold">{loc.name}</p>
                     <p className="text-sm text-muted-foreground mt-1">{loc.address}</p>
                     <p className="text-sm text-muted-foreground">{loc.neighborhood}</p>
+                    {loc.distance && (
+                      <p className="text-xs text-primary font-semibold mt-1">
+                        📍 {loc.distance.toFixed(1)} km de distância
+                      </p>
+                    )}
                   </div>
                   <Badge className={getTypeColor(loc.type)}>{loc.type}</Badge>
                 </div>
