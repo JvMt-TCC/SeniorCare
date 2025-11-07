@@ -9,6 +9,15 @@ interface Profile {
   email: string;
   telefone?: string;
   endereco?: string;
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  latitude?: number;
+  longitude?: number;
   data_nascimento?: string;
   user_type: 'idoso' | 'voluntario';
   problemas_saude?: string[];
@@ -33,6 +42,15 @@ interface SignupData {
   password: string;
   telefone?: string;
   endereco?: string;
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  latitude?: string;
+  longitude?: string;
   data_nascimento?: string;
   user_type: 'idoso' | 'voluntario';
   problemas_saude?: string[];
@@ -167,6 +185,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             username: signupData.username,
             telefone: signupData.telefone,
             endereco: signupData.endereco,
+            cep: signupData.cep,
+            logradouro: signupData.logradouro,
+            numero: signupData.numero,
+            complemento: signupData.complemento,
+            bairro: signupData.bairro,
+            cidade: signupData.cidade,
+            estado: signupData.estado,
+            latitude: signupData.latitude,
+            longitude: signupData.longitude,
             data_nascimento: signupData.data_nascimento,
             user_type: signupData.user_type,
             problemas_saude: JSON.stringify(signupData.problemas_saude || []),

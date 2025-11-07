@@ -256,14 +256,23 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bairro: string | null
           bio: string | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
           created_at: string | null
           data_nascimento: string | null
           email: string
           endereco: string | null
+          estado: string | null
           gostos_lazer: Json | null
           id: string
+          latitude: number | null
+          logradouro: string | null
+          longitude: number | null
           nome: string
+          numero: string | null
           problemas_saude: Json | null
           telefone: string | null
           updated_at: string | null
@@ -272,14 +281,23 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bairro?: string | null
           bio?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
           created_at?: string | null
           data_nascimento?: string | null
           email: string
           endereco?: string | null
+          estado?: string | null
           gostos_lazer?: Json | null
           id: string
+          latitude?: number | null
+          logradouro?: string | null
+          longitude?: number | null
           nome: string
+          numero?: string | null
           problemas_saude?: Json | null
           telefone?: string | null
           updated_at?: string | null
@@ -288,14 +306,23 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bairro?: string | null
           bio?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
           created_at?: string | null
           data_nascimento?: string | null
           email?: string
           endereco?: string | null
+          estado?: string | null
           gostos_lazer?: Json | null
           id?: string
+          latitude?: number | null
+          logradouro?: string | null
+          longitude?: number | null
           nome?: string
+          numero?: string | null
           problemas_saude?: Json | null
           telefone?: string | null
           updated_at?: string | null

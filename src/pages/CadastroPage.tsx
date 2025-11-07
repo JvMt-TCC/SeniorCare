@@ -54,21 +54,28 @@ const CadastroPage = () => {
     password: "",
     confirmPassword: "",
     telefone: "",
-    endereco: "",
+    cep: "",
+    logradouro: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
     data_nascimento: "",
     problemas_saude: [] as string[],
     gostos_lazer: [] as string[],
     userType: "idoso" as "idoso" | "voluntario"
   });
+  const [loadingCep, setLoadingCep] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validações
-    if (!formData.nome || !formData.username || !formData.email || !formData.password) {
+    if (!formData.nome || !formData.username || !formData.email || !formData.password || !formData.cep || !formData.numero) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        description: "Por favor, preencha todos os campos obrigatórios (nome, usuário, email, senha, CEP e número).",
         variant: "destructive",
       });
       return;
@@ -112,10 +119,12 @@ const CadastroPage = () => {
       return;
     }
 
-    if (formData.endereco && formData.endereco.length > 200) {
+    // Validação de CEP
+    const cepNumeros = formData.cep.replace(/\D/g, '');
+    if (cepNumeros.length !== 8) {
       toast({
         title: "Erro",
-        description: "O endereço deve ter no máximo 200 caracteres.",
+        description: "O CEP deve conter exatamente 8 dígitos.",
         variant: "destructive",
       });
       return;
@@ -154,13 +163,41 @@ const CadastroPage = () => {
 
     setLoading(true);
     
+    // Buscar coordenadas do endereço completo
+    const enderecoCompleto = `${formData.logradouro}, ${formData.numero}, ${formData.bairro}, ${formData.cidade}, ${formData.estado}, Brasil`;
+    let latitude, longitude;
+    
+    try {
+      const geoResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(enderecoCompleto)}&limit=1`
+      );
+      const geoData = await geoResponse.json();
+      if (geoData && geoData[0]) {
+        latitude = geoData[0].lat;
+        longitude = geoData[0].lon;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar coordenadas:', error);
+    }
+
+    const enderecoFormatado = `${formData.logradouro}, ${formData.numero}${formData.complemento ? `, ${formData.complemento}` : ''} - ${formData.bairro}, ${formData.cidade}/${formData.estado} - CEP: ${formData.cep}`;
+    
     const { error } = await signup({
       nome: formData.nome,
       username: formData.username,
       email: formData.email,
       password: formData.password,
       telefone: formData.telefone || undefined,
-      endereco: formData.endereco || undefined,
+      endereco: enderecoFormatado,
+      cep: formData.cep,
+      logradouro: formData.logradouro,
+      numero: formData.numero,
+      complemento: formData.complemento || undefined,
+      bairro: formData.bairro,
+      cidade: formData.cidade,
+      estado: formData.estado,
+      latitude: latitude || undefined,
+      longitude: longitude || undefined,
       data_nascimento: formData.data_nascimento || undefined,
       problemas_saude: formData.problemas_saude,
       gostos_lazer: formData.gostos_lazer,
@@ -209,6 +246,47 @@ const CadastroPage = () => {
         ...formData,
         gostos_lazer: formData.gostos_lazer.filter(g => g !== gosto)
       });
+    }
+  };
+
+  const handleCepChange = async (cep: string) => {
+    const cepNumeros = cep.replace(/\D/g, '');
+    setFormData({ ...formData, cep: cepNumeros });
+
+    if (cepNumeros.length === 8) {
+      setLoadingCep(true);
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepNumeros}/json/`);
+        const data = await response.json();
+
+        if (!data.erro) {
+          setFormData(prev => ({
+            ...prev,
+            logradouro: data.logradouro,
+            bairro: data.bairro,
+            cidade: data.localidade,
+            estado: data.uf
+          }));
+          toast({
+            title: "CEP encontrado!",
+            description: "Endereço preenchido automaticamente.",
+          });
+        } else {
+          toast({
+            title: "CEP não encontrado",
+            description: "Por favor, verifique o CEP digitado.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Erro ao buscar CEP",
+          description: "Não foi possível buscar o endereço. Tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingCep(false);
+      }
     }
   };
 
@@ -382,18 +460,97 @@ const CadastroPage = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Endereço</label>
-                <Input
-                  type="text"
-                  value={formData.endereco}
-                  onChange={(e) =>
-                    setFormData({ ...formData, endereco: e.target.value })
-                  }
-                  placeholder="Digite seu endereço completo"
-                  className="text-senior-base"
-                  maxLength={200}
-                />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">CEP *</label>
+                  <Input
+                    type="text"
+                    value={formData.cep}
+                    onChange={(e) => handleCepChange(e.target.value)}
+                    placeholder="00000-000"
+                    className="text-senior-base"
+                    maxLength={9}
+                    required
+                  />
+                  {loadingCep && (
+                    <p className="text-xs text-muted-foreground mt-1">Buscando endereço...</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium mb-2">Logradouro</label>
+                    <Input
+                      type="text"
+                      value={formData.logradouro}
+                      onChange={(e) => setFormData({ ...formData, logradouro: e.target.value })}
+                      placeholder="Rua/Avenida"
+                      className="text-senior-base"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Número *</label>
+                    <Input
+                      type="text"
+                      value={formData.numero}
+                      onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                      placeholder="Nº"
+                      className="text-senior-base"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Complemento</label>
+                    <Input
+                      type="text"
+                      value={formData.complemento}
+                      onChange={(e) => setFormData({ ...formData, complemento: e.target.value })}
+                      placeholder="Apto, Bloco, etc."
+                      className="text-senior-base"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Bairro</label>
+                    <Input
+                      type="text"
+                      value={formData.bairro}
+                      onChange={(e) => setFormData({ ...formData, bairro: e.target.value })}
+                      placeholder="Bairro"
+                      className="text-senior-base"
+                      readOnly
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Cidade</label>
+                    <Input
+                      type="text"
+                      value={formData.cidade}
+                      onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
+                      placeholder="Cidade"
+                      className="text-senior-base"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Estado</label>
+                    <Input
+                      type="text"
+                      value={formData.estado}
+                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                      placeholder="UF"
+                      className="text-senior-base"
+                      maxLength={2}
+                      readOnly
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
