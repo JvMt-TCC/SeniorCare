@@ -199,7 +199,6 @@ const MensagensPage = () => {
     }
 
     setNewMessage("");
-    fetchMessages(selectedFriend.id);
   };
 
   if (selectedFriend) {
