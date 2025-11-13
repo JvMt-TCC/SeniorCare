@@ -59,36 +59,49 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
 
   return (
     <div className="mobile-container">
-      {/* Header com ícones */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b pt-safe-top">
-        <div className="flex justify-end items-center px-4 py-3 space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setAlarmsOpen(true)}
-            className="relative"
-          >
-            <Clock size={24} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleOpenNotifications}
-            className="relative"
-          >
-            <Bell size={24} />
-            {hasNewNotifications && (
-              <span className="absolute top-1 right-1 w-3 h-3 bg-destructive rounded-full border-2 border-background animate-pulse" />
-            )}
-          </Button>
+      {/* Header compacto e otimizado para mobile */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm pt-safe-top">
+        <div className="flex justify-between items-center px-3 py-2">
+          <div className="flex items-center gap-2">
+            <img 
+              src="/src/images/SeniorCareLogo.png" 
+              alt="Logo" 
+              className="h-8 w-auto"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setAlarmsOpen(true)}
+              className="relative h-9 w-9 hover:bg-primary-soft/50"
+            >
+              <Clock size={20} className="text-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleOpenNotifications}
+              className="relative h-9 w-9 hover:bg-primary-soft/50"
+            >
+              <Bell size={20} className="text-foreground" />
+              {hasNewNotifications && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <main className="pb-24 px-4 pt-20 fade-in min-h-screen mobile-scroll">
+      <main className="pb-20 px-4 pt-16 fade-in min-h-screen mobile-scroll">
         {children}
       </main>
       
-      <FixedChat />
+      {/* Chat fixo otimizado para mobile */}
+      <div className="fixed-chat-mobile">
+        <FixedChat />
+      </div>
+      
       <BottomNavigation />
       
       <NotificationsModal 

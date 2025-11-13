@@ -84,9 +84,9 @@ const VolunteerChatPage = () => {
     fetchChatInfo();
     fetchMessages();
 
-    // Subscribe to new messages
+    // Subscribe to new messages with unique channel
     const subscription = supabase
-      .channel(`chat_${chatId}`)
+      .channel(`volunteer-chat-${chatId}`)
       .on('postgres_changes',
         {
           event: 'INSERT',
@@ -101,7 +101,7 @@ const VolunteerChatPage = () => {
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(subscription);
     };
   }, [chatId, user, navigate, toast]);
 

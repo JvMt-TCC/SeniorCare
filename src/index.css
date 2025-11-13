@@ -308,4 +308,25 @@
       @apply min-h-touch text-lg px-8 py-4;
     }
   }
+
+  /* Chat fixo otimizado para mobile */
+  .fixed-chat-mobile {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    z-index: 50;
+  }
+
+  @media (max-width: 640px) {
+    .fixed-chat-mobile {
+      bottom: 72px;
+      right: 12px;
+    }
+  }
+
+  /* Otimizações extras para telas de chat */
+  .mobile-container .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
 }
