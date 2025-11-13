@@ -1,5 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Bell, Clock } from "lucide-react";
+import { Bell, Clock, User, Bookmark } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import BottomNavigation from "./BottomNavigation";
 import FixedChat from "./FixedChat";
 import NotificationsModal from "./NotificationsModal";
@@ -16,6 +17,7 @@ interface MobileLayoutProps {
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { user } = useAuth();
   const { alarms } = useAlarms();
+  const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [alarmsOpen, setAlarmsOpen] = useState(false);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
@@ -62,12 +64,23 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       {/* Header compacto e otimizado para mobile */}
       <div className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm pt-safe-top">
         <div className="flex justify-between items-center px-3 py-2">
-          <div className="flex items-center gap-2">
-            <img 
-              src="/src/images/SeniorCareLogo.png" 
-              alt="Logo" 
-              className="h-8 w-auto"
-            />
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/perfil')}
+              className="h-9 w-9 hover:bg-primary-soft/50"
+            >
+              <User size={20} className="text-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/meus-eventos')}
+              className="h-9 w-9 hover:bg-primary-soft/50"
+            >
+              <Bookmark size={20} className="text-foreground" />
+            </Button>
           </div>
           <div className="flex items-center gap-1">
             <Button
