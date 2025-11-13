@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Bell, Clock, User, Bookmark } from "lucide-react";
+import { Bell, Clock, User, Bookmark, Calendar as CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavigation from "./BottomNavigation";
 import FixedChat from "./FixedChat";
@@ -83,6 +83,14 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
             </Button>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/calendario')}
+              className="h-9 w-9 hover:bg-primary-soft/50"
+            >
+              <CalendarIcon size={20} className="text-foreground" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

@@ -58,8 +58,11 @@ const FriendProfileModal = ({ isOpen, onOpenChange, friend }: FriendProfileModal
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-4">
             <Avatar className="w-24 h-24">
-              <AvatarImage src={friend.avatar_url || undefined} />
-              <AvatarFallback className="text-2xl">
+              <AvatarImage 
+                src={friend.avatar_url || undefined} 
+                alt={`Foto de ${friend.nome}`}
+              />
+              <AvatarFallback className="text-2xl bg-primary-soft text-primary">
                 {friend.nome?.charAt(0) || "?"}
               </AvatarFallback>
             </Avatar>

@@ -7,11 +7,8 @@ const BottomNavigation = () => {
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Lightbulb, label: "Sugestões", path: "/sugestoes" },
-    { icon: Star, label: "Meus Eventos", path: "/meus-eventos" },
-    { icon: Calendar, label: "Calendário", path: "/calendario" },
     { icon: Heart, label: "Saúde", path: "/saude" },
     { icon: MessageCircle, label: "Mensagens", path: "/mensagens" },
-    { icon: User, label: "Perfil", path: "/perfil" },
   ];
 
   return (

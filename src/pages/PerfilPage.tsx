@@ -2,16 +2,21 @@ import { User, Mail, Phone, MapPin, Calendar, Edit, Camera } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import EditProfileDialog from "../components/EditProfileDialog";
 import EditPhoneDialog from "../components/EditPhoneDialog";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const PerfilPage = () => {
   const { user, logout, profile } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isEditPhoneOpen, setIsEditPhoneOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   const userInfo = {
     name: profile?.nome || user?.user_metadata?.nome || "Usuário",
@@ -28,11 +33,75 @@ const PerfilPage = () => {
     await logout();
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // TODO: Implement image upload to Supabase storage
-      console.log("Image upload functionality to be implemented");
+    if (!file || !user) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione uma imagem válida",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar tamanho (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erro",
+        description: "A imagem deve ter no máximo 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      // Upload para o Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Atualizar perfil com nova URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Sucesso",
+        description: "Foto de perfil atualizada com sucesso!"
+      });
+
+      // Recarregar a página para atualizar a foto
+      window.location.reload();
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer upload da foto. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -47,12 +116,31 @@ const PerfilPage = () => {
       {/* Foto e informações principais */}
       <div className="card-soft text-center slide-up">
         <div className="relative w-24 h-24 mx-auto mb-4">
-          {/* TODO: Implement profile image from Supabase storage */}
-          <div className="w-24 h-24 bg-primary-soft rounded-full flex items-center justify-center">
-            <User size={48} className="text-primary" />
-          </div>
+          <Avatar className="w-24 h-24">
+            <AvatarImage src={profile?.avatar_url || undefined} />
+            <AvatarFallback className="text-4xl bg-primary-soft text-primary">
+              {userInfo.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <label 
+            htmlFor="avatar-upload" 
+            className="absolute bottom-0 right-0 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors shadow-lg"
+          >
+            <Camera size={16} className="text-primary-foreground" />
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+          </label>
         </div>
         <h2 className="text-senior-xl text-primary mb-2">{userInfo.name}</h2>
+        {uploading && (
+          <p className="text-sm text-muted-foreground">Enviando foto...</p>
+        )}
       </div>
 
 

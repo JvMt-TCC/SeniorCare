@@ -22,6 +22,9 @@ interface Profile {
   user_type: 'idoso' | 'voluntario';
   problemas_saude?: string[];
   gostos_lazer?: string[];
+  avatar_url?: string;
+  username?: string;
+  bio?: string;
 }
 
 interface AuthContextType {
