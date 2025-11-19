@@ -64,7 +64,10 @@ const CadastroPage = () => {
     data_nascimento: "",
     problemas_saude: [] as string[],
     gostos_lazer: [] as string[],
-    userType: "idoso" as "idoso" | "voluntario"
+    userType: "idoso" as "idoso" | "voluntario",
+    trusted_contact_name: "",
+    trusted_contact_phone: "",
+    trusted_contact_address: ""
   });
   const [loadingCep, setLoadingCep] = useState(false);
 
@@ -201,7 +204,10 @@ const CadastroPage = () => {
       data_nascimento: formData.data_nascimento || undefined,
       problemas_saude: formData.problemas_saude,
       gostos_lazer: formData.gostos_lazer,
-      user_type: formData.userType
+      user_type: formData.userType,
+      trusted_contact_name: formData.userType === 'idoso' ? formData.trusted_contact_name || undefined : undefined,
+      trusted_contact_phone: formData.userType === 'idoso' ? formData.trusted_contact_phone || undefined : undefined,
+      trusted_contact_address: formData.userType === 'idoso' ? formData.trusted_contact_address || undefined : undefined
     });
     
     if (error) {
@@ -598,6 +604,52 @@ const CadastroPage = () => {
                   ))}
                 </div>
               </div>
+
+              {formData.userType === 'idoso' && (
+                <div className="space-y-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <h3 className="font-semibold text-lg">Contato de Confiança (Emergência)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione um contato de confiança que poderá ser acionado em caso de emergência
+                  </p>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Nome do Contato</label>
+                    <Input
+                      type="text"
+                      value={formData.trusted_contact_name}
+                      onChange={(e) => setFormData({ ...formData, trusted_contact_name: e.target.value })}
+                      placeholder="Nome completo"
+                      className="text-senior-base"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Telefone do Contato</label>
+                    <Input
+                      type="tel"
+                      value={formData.trusted_contact_phone}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 11) {
+                          const formatted = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                          setFormData({ ...formData, trusted_contact_phone: value.length <= 2 ? value : formatted });
+                        }
+                      }}
+                      placeholder="(00) 00000-0000"
+                      className="text-senior-base"
+                      maxLength={15}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Endereço do Contato</label>
+                    <Input
+                      type="text"
+                      value={formData.trusted_contact_address}
+                      onChange={(e) => setFormData({ ...formData, trusted_contact_address: e.target.value })}
+                      placeholder="Endereço completo"
+                      className="text-senior-base"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-col gap-2">
                 <Button

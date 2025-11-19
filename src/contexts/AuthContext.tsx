@@ -25,6 +25,9 @@ interface Profile {
   avatar_url?: string;
   username?: string;
   bio?: string;
+  trusted_contact_name?: string;
+  trusted_contact_phone?: string;
+  trusted_contact_address?: string;
 }
 
 interface AuthContextType {
@@ -58,6 +61,9 @@ interface SignupData {
   user_type: 'idoso' | 'voluntario';
   problemas_saude?: string[];
   gostos_lazer?: string[];
+  trusted_contact_name?: string;
+  trusted_contact_phone?: string;
+  trusted_contact_address?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -200,7 +206,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             data_nascimento: signupData.data_nascimento,
             user_type: signupData.user_type,
             problemas_saude: JSON.stringify(signupData.problemas_saude || []),
-            gostos_lazer: JSON.stringify(signupData.gostos_lazer || [])
+            gostos_lazer: JSON.stringify(signupData.gostos_lazer || []),
+            trusted_contact_name: signupData.trusted_contact_name,
+            trusted_contact_phone: signupData.trusted_contact_phone,
+            trusted_contact_address: signupData.trusted_contact_address
           }
         }
       });
