@@ -10,6 +10,8 @@ import FriendProfileModal from "../components/FriendProfileModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import EmergencyButton from "@/components/EmergencyButton";
+import { useAuth as useAuthProfile } from "@/contexts/AuthContext";
 
 interface Friend {
   id: string;
@@ -22,6 +24,7 @@ interface Friend {
 
 const HomePage = () => {
   const { user } = useAuth();
+  const { profile } = useAuthProfile();
   const { toast } = useToast();
   const { alarms, addAlarm, removeAlarm, toggleAlarm } = useAlarms();
   const [isAlarmDialogOpen, setIsAlarmDialogOpen] = useState(false);
@@ -327,6 +330,8 @@ const HomePage = () => {
         onOpenChange={setIsFriendProfileOpen}
         friend={selectedFriend}
       />
+
+      {profile?.user_type === 'idoso' && <EmergencyButton />}
     </div>
   );
 };

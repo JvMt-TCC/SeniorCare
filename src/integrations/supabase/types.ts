@@ -275,6 +275,9 @@ export type Database = {
           numero: string | null
           problemas_saude: Json | null
           telefone: string | null
+          trusted_contact_address: string | null
+          trusted_contact_name: string | null
+          trusted_contact_phone: string | null
           updated_at: string | null
           user_type: Database["public"]["Enums"]["user_type"]
           username: string | null
@@ -300,6 +303,9 @@ export type Database = {
           numero?: string | null
           problemas_saude?: Json | null
           telefone?: string | null
+          trusted_contact_address?: string | null
+          trusted_contact_name?: string | null
+          trusted_contact_phone?: string | null
           updated_at?: string | null
           user_type?: Database["public"]["Enums"]["user_type"]
           username?: string | null
@@ -325,6 +331,9 @@ export type Database = {
           numero?: string | null
           problemas_saude?: Json | null
           telefone?: string | null
+          trusted_contact_address?: string | null
+          trusted_contact_name?: string | null
+          trusted_contact_phone?: string | null
           updated_at?: string | null
           user_type?: Database["public"]["Enums"]["user_type"]
           username?: string | null
