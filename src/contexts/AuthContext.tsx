@@ -238,6 +238,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setSession(null);
       setProfile(null);
+      
+      // Clear remembered username if user logs out
+      const shouldRemember = localStorage.getItem("rememberMe") === "true";
+      if (!shouldRemember) {
+        localStorage.removeItem("rememberedUsername");
+        localStorage.removeItem("rememberMe");
+      }
     } catch (error) {
       console.error("Error logging out:", error);
     }

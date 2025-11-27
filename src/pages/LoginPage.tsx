@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +9,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { Checkbox } from "../components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import Logo from "../images/SeniorCareLogo.png";
 
@@ -21,6 +22,17 @@ const LoginPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("rememberedUsername");
+    const shouldRemember = localStorage.getItem("rememberMe") === "true";
+    
+    if (savedUsername && shouldRemember) {
+      setFormData(prev => ({ ...prev, username: savedUsername }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +54,15 @@ const LoginPage = () => {
         description: error,
         variant: "destructive",
       });
+    } else {
+      // Save username if remember me is checked
+      if (rememberMe) {
+        localStorage.setItem("rememberedUsername", formData.username);
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberedUsername");
+        localStorage.removeItem("rememberMe");
+      }
     }
     
     setLoading(false);
@@ -116,6 +137,19 @@ const LoginPage = () => {
                     )}
                   </button>
                 </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Lembrar meu usuário
+                </label>
               </div>
               <Button
                 type="submit"
