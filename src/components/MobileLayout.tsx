@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Bell, Clock, User, Bookmark, Calendar as CalendarIcon } from "lucide-react";
+import { Bell, Clock, User, Bookmark, Calendar as CalendarIcon, AlertTriangle, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavigation from "./BottomNavigation";
 import FixedChat from "./FixedChat";
@@ -9,19 +9,31 @@ import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlarms } from "@/contexts/AlarmContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 interface MobileLayoutProps {
   children: ReactNode;
 }
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { alarms } = useAlarms();
   const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [alarmsOpen, setAlarmsOpen] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  const handleEmergencyCall = (number: string) => {
+    window.location.href = `tel:${number}`;
+    setEmergencyOpen(false);
+  };
 
   // Verificar notificações não lidas
   useEffect(() => {
@@ -86,6 +98,14 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => setEmergencyOpen(true)}
+              className="h-9 w-9 hover:bg-destructive/10 text-destructive"
+            >
+              <AlertTriangle size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigate('/calendario')}
               className="h-9 w-9 hover:bg-primary-soft/50"
             >
@@ -133,6 +153,44 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
         open={alarmsOpen} 
         onOpenChange={setAlarmsOpen} 
       />
+      
+      <Dialog open={emergencyOpen} onOpenChange={setEmergencyOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center text-destructive">
+              Emergência
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Button
+              onClick={() => handleEmergencyCall("192")}
+              className="w-full h-20 text-lg bg-destructive hover:bg-destructive/90"
+              size="lg"
+            >
+              <Phone className="mr-2" size={24} />
+              Ligar para SAMU (192)
+            </Button>
+
+            {profile?.trusted_contact_phone && (
+              <Button
+                onClick={() => handleEmergencyCall(profile.trusted_contact_phone!)}
+                className="w-full h-20 text-lg"
+                variant="outline"
+                size="lg"
+              >
+                <Phone className="mr-2" size={24} />
+                Ligar para {profile.trusted_contact_name || "Contato de Confiança"}
+              </Button>
+            )}
+
+            {!profile?.trusted_contact_phone && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Adicione um contato de confiança nas configurações do seu perfil
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

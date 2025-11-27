@@ -32,11 +32,14 @@ const FixedChat = () => {
     try {
       const CHAT_URL = `https://alxuaxrykccielfsmyye.supabase.co/functions/v1/chat`;
       
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token || '';
+      
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${supabase.auth.getSession().then(s => s.data.session?.access_token || '')}`,
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
           messages: userMessages.map(msg => ({
