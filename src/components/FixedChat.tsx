@@ -141,16 +141,23 @@ const FixedChat = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-24 right-4 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-50 hover:scale-110 transition-transform"
-          style={{ background: 'var(--gradient-primary)', boxShadow: 'var(--shadow-button)' }}
+          className="fixed bottom-20 sm:bottom-24 right-4 w-14 h-14 sm:w-16 sm:h-16 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+          style={{ 
+            background: 'var(--gradient-primary)', 
+            boxShadow: 'var(--shadow-button)',
+            zIndex: 9999
+          }}
         >
-          <Bot size={28} />
+          <Bot size={28} className="sm:w-8 sm:h-8" />
         </button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-4 left-4 sm:left-auto sm:w-80 h-96 bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
+        <div 
+          className="fixed bottom-20 sm:bottom-24 right-4 left-4 sm:left-auto sm:w-80 h-96 bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+          style={{ zIndex: 9999 }}
+        >
           {/* Header */}
           <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between rounded-t-2xl">
             <h3 className="font-semibold">Assistente Virtual</h3>
