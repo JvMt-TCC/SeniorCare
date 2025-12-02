@@ -239,6 +239,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setProfile(null);
       
+      // Limpar frase do dia para nova seleção no próximo login
+      sessionStorage.removeItem('dailyPhrase');
+      
       // Clear remembered username if user logs out
       const shouldRemember = localStorage.getItem("rememberMe") === "true";
       if (!shouldRemember) {

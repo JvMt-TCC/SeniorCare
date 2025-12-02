@@ -1,15 +1,28 @@
-import { Home, Calendar, MessageCircle, User, Lightbulb, Star, Heart } from "lucide-react";
+import { Home, Calendar, MessageCircle, User, Lightbulb, Star, Heart, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BottomNavigation = () => {
   const location = useLocation();
+  const { profile } = useAuth();
 
-  const navItems = [
+  const isVolunteer = profile?.user_type === 'voluntario';
+
+  const elderNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Lightbulb, label: "Sugestões", path: "/sugestoes" },
     { icon: Heart, label: "Saúde", path: "/saude" },
     { icon: MessageCircle, label: "Mensagens", path: "/mensagens" },
   ];
+
+  const volunteerNavItems = [
+    { icon: Home, label: "Home", path: "/" },
+    { icon: Users, label: "Voluntariado", path: "/saude/ajuda-amigo" },
+    { icon: Heart, label: "Saúde", path: "/saude" },
+    { icon: MessageCircle, label: "Mensagens", path: "/mensagens" },
+  ];
+
+  const navItems = isVolunteer ? volunteerNavItems : elderNavItems;
 
   return (
     <nav className="bottom-nav safe-area-bottom">
