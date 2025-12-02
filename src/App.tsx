@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import HomePage from "./pages/HomePage";
 import SugestoesPage from "./pages/SugestoesPage";
 import CalendarioPage from "./pages/CalendarioPage";
@@ -89,6 +90,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <AppContent />
             </BrowserRouter>
           </TaskProvider>
