@@ -2,7 +2,6 @@ import { ReactNode, useState, useEffect } from "react";
 import { Bell, Clock, User, Bookmark, Calendar as CalendarIcon, AlertTriangle, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavigation from "./BottomNavigation";
-import FixedChat from "./FixedChat";
 import NotificationsModal from "./NotificationsModal";
 import AlarmModal from "./AlarmModal";
 import { Button } from "./ui/button";
@@ -137,11 +136,6 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       <main className="pb-20 px-4 pt-16 fade-in min-h-screen mobile-scroll">
         {children}
       </main>
-      
-      {/* Chat fixo otimizado para mobile */}
-      <div className="fixed-chat-mobile">
-        <FixedChat />
-      </div>
       
       <BottomNavigation />
       
