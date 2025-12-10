@@ -141,7 +141,7 @@ const ElderChatPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-primary-soft via-background to-secondary">
+    <div className="flex flex-col h-[calc(100vh-8rem)] -mt-4 -mx-4 bg-gradient-to-br from-primary-soft via-background to-secondary">
       {/* Header */}
       <div className="bg-white border-b border-border px-4 py-3 flex items-center gap-3 shadow-sm">
         <Button
@@ -203,7 +203,7 @@ const ElderChatPage = () => {
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Digite sua mensagem..."
             className="flex-1 text-senior-base"
           />
