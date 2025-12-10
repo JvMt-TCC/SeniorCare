@@ -261,7 +261,7 @@ const MensagensPage = () => {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Digite sua mensagem..."
               maxLength={MAX_MESSAGE_LENGTH}
               className="w-full p-3 border border-border rounded-xl bg-background text-senior-base"

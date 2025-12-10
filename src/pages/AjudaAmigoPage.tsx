@@ -87,7 +87,7 @@ const AjudaAmigoPage = () => {
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(subscription);
     };
   }, [user]);
 
