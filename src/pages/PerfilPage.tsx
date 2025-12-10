@@ -1,22 +1,25 @@
 import { User, Mail, Phone, MapPin, Calendar, Edit, Camera } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import EditProfileDialog from "../components/EditProfileDialog";
 import EditPhoneDialog from "../components/EditPhoneDialog";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PerfilPage = () => {
   const { user, logout, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isEditPhoneOpen, setIsEditPhoneOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [avatarKey, setAvatarKey] = useState(Date.now());
   
   const userInfo = {
     name: profile?.nome || user?.user_metadata?.nome || "Usuário",
@@ -91,8 +94,9 @@ const PerfilPage = () => {
         description: "Foto de perfil atualizada com sucesso!"
       });
 
-      // Recarregar a página para atualizar a foto
-      window.location.reload();
+      // Forçar atualização do avatar sem recarregar a página
+      setAvatarKey(Date.now());
+      queryClient.invalidateQueries();
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast({
@@ -116,8 +120,8 @@ const PerfilPage = () => {
       {/* Foto e informações principais */}
       <div className="card-soft text-center slide-up">
         <div className="relative w-24 h-24 mx-auto mb-4">
-          <Avatar className="w-24 h-24">
-            <AvatarImage src={profile?.avatar_url || undefined} />
+          <Avatar className="w-24 h-24" key={avatarKey}>
+            <AvatarImage src={profile?.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : undefined} />
             <AvatarFallback className="text-4xl bg-primary-soft text-primary">
               {userInfo.name.charAt(0)}
             </AvatarFallback>

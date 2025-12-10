@@ -73,7 +73,7 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
   return (
     <div className="mobile-container">
       {/* Header compacto e otimizado para mobile */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm pt-safe-top">
+      <div className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
         <div className="flex justify-between items-center px-3 py-2">
           <div className="flex items-center gap-1">
             <Button

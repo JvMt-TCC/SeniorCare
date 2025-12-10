@@ -57,7 +57,12 @@ const GPSMap = ({ targetLat, targetLng, locationName }: GPSMapProps) => {
 
   const openInMaps = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${targetLat},${targetLng}`;
-    window.open(url, '_blank');
+    // Usar window.open com _system para abrir no app de mapas nativo em mobile
+    const newWindow = window.open(url, '_system');
+    if (!newWindow) {
+      // Fallback para navegadores que bloqueiam popups
+      window.location.href = url;
+    }
   };
 
   return (
