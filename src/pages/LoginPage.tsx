@@ -12,6 +12,7 @@ import { Button } from "../components/ui/button";
 import { Checkbox } from "../components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import Logo from "../images/SeniorCareLogo.png";
+import { capacitorStorage } from "@/lib/storage";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -25,13 +26,16 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem("rememberedUsername");
-    const shouldRemember = localStorage.getItem("rememberMe") === "true";
-    
-    if (savedUsername && shouldRemember) {
-      setFormData(prev => ({ ...prev, username: savedUsername }));
-      setRememberMe(true);
-    }
+    const loadRememberedUser = async () => {
+      const savedUsername = await capacitorStorage.getItem("rememberedUsername");
+      const shouldRemember = await capacitorStorage.getItem("rememberMe");
+      
+      if (savedUsername && shouldRemember === "true") {
+        setFormData(prev => ({ ...prev, username: savedUsername }));
+        setRememberMe(true);
+      }
+    };
+    loadRememberedUser();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,11 +61,11 @@ const LoginPage = () => {
     } else {
       // Save username if remember me is checked
       if (rememberMe) {
-        localStorage.setItem("rememberedUsername", formData.username);
-        localStorage.setItem("rememberMe", "true");
+        capacitorStorage.setItem("rememberedUsername", formData.username);
+        capacitorStorage.setItem("rememberMe", "true");
       } else {
-        localStorage.removeItem("rememberedUsername");
-        localStorage.removeItem("rememberMe");
+        capacitorStorage.removeItem("rememberedUsername");
+        capacitorStorage.removeItem("rememberMe");
       }
     }
     
