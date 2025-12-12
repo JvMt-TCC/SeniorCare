@@ -11,7 +11,7 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Checkbox } from "../components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import Logo from "../images/SeniorCareLogo.png";
+import Logo from "@/assets/SeniorCareLogo.png";
 
 const problemasSaudeOptions = [
   "Nenhum problema de saúde",

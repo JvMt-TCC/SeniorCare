@@ -312,7 +312,7 @@ const MeusEventosPage = () => {
                       onClick={() => updateStatus(event.id, 'presente')}
                       className={`flex-1 touch-button ${
                         status === 'presente' 
-                          ? 'bg-green-600 hover:bg-green-700' 
+                          ? 'bg-primary hover:bg-primary/90' 
                           : 'bg-secondary hover:bg-secondary/80'
                       }`}
                       variant={status === 'presente' ? 'default' : 'outline'}
@@ -324,7 +324,7 @@ const MeusEventosPage = () => {
                       onClick={() => updateStatus(event.id, 'ausente')}
                       className={`flex-1 touch-button ${
                         status === 'ausente' 
-                          ? 'bg-red-600 hover:bg-red-700' 
+                          ? 'bg-destructive hover:bg-destructive/90' 
                           : 'bg-secondary hover:bg-secondary/80'
                       }`}
                       variant={status === 'ausente' ? 'default' : 'outline'}

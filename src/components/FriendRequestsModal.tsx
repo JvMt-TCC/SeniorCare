@@ -152,7 +152,7 @@ const FriendRequestsModal = ({ isOpen, onOpenChange, onRequestHandled }: FriendR
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 text-green-600 hover:bg-green-50"
+                    className="h-8 w-8 text-primary hover:bg-primary/10"
                     onClick={() => handleRequest(request.id, "accepted", request.from_user_id)}
                   >
                     <Check className="w-4 h-4" />
@@ -160,7 +160,7 @@ const FriendRequestsModal = ({ isOpen, onOpenChange, onRequestHandled }: FriendR
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 text-red-600 hover:bg-red-50"
+                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
                     onClick={() => handleRequest(request.id, "rejected", request.from_user_id)}
                   >
                     <X className="w-4 h-4" />
