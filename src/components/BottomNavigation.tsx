@@ -25,7 +25,7 @@ const BottomNavigation = () => {
   const navItems = isVolunteer ? volunteerNavItems : elderNavItems;
 
   return (
-    <nav className="bottom-nav safe-area-bottom">
+    <nav className="bottom-nav" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
       <div className="flex justify-around items-center py-2 px-2 overflow-x-auto">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path || location.pathname.startsWith(path + '/');

@@ -195,10 +195,10 @@ const HomePage = () => {
                   key={task.id}
                   className={`p-4 rounded-xl border-2 transition-all ${
                     isPastDue
-                      ? 'bg-red-50 border-red-200'
+                      ? 'bg-destructive/10 border-destructive/30'
                       : isToday
                       ? 'bg-primary-soft border-primary'
-                      : 'bg-white border-border'
+                      : 'bg-card border-border'
                   }`}
                 >
                   <div className="flex items-start">
@@ -271,16 +271,16 @@ const HomePage = () => {
                 <div
                   key={alarm.id}
                   className={`p-4 rounded-xl border-2 flex items-center justify-between ${
-                    alarm.isActive ? 'bg-white border-primary' : 'bg-gray-50 border-gray-200'
+                    alarm.isActive ? 'bg-card border-primary' : 'bg-muted border-border'
                   }`}
                 >
                   <div className="flex items-center space-x-3 flex-1">
-                    <Clock size={24} className={alarm.isActive ? 'text-primary' : 'text-gray-400'} />
+                    <Clock size={24} className={alarm.isActive ? 'text-primary' : 'text-muted-foreground'} />
                     <div>
-                      <p className={`font-medium ${alarm.isActive ? 'text-foreground' : 'text-gray-500'}`}>
+                      <p className={`font-medium ${alarm.isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {alarm.title}
                       </p>
-                      <p className={`text-lg ${alarm.isActive ? 'text-primary' : 'text-gray-400'}`}>
+                      <p className={`text-lg ${alarm.isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                         {alarm.time}
                       </p>
                     </div>
@@ -289,7 +289,7 @@ const HomePage = () => {
                     <button
                       onClick={() => toggleAlarm(alarm.id)}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        alarm.isActive ? 'bg-primary' : 'bg-gray-300'
+                        alarm.isActive ? 'bg-primary' : 'bg-muted-foreground/30'
                       }`}
                     >
                       <span
