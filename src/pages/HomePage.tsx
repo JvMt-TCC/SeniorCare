@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useAlarms } from "../contexts/AlarmContext";
+import { useTasks } from "../contexts/TaskContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
@@ -11,7 +12,6 @@ import FriendProfileModal from "../components/FriendProfileModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
 const DAILY_PHRASES = [
   "A idade não é medida pelos anos vividos, mas pela sabedoria adquirida e pelos sorrisos compartilhados.",
   "Cada dia é uma nova oportunidade para aprender, crescer e fazer a diferença.",
@@ -39,13 +39,13 @@ const HomePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { alarms, addAlarm, removeAlarm, toggleAlarm } = useAlarms();
+  const { tasks } = useTasks();
   const [isAlarmDialogOpen, setIsAlarmDialogOpen] = useState(false);
   const [newAlarm, setNewAlarm] = useState({ title: "", time: "" });
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [isFriendProfileOpen, setIsFriendProfileOpen] = useState(false);
-  const [tasks, setTasks] = useState<Array<{ id: string; title: string; subtitle: string | null; date: string }>>([]);
 
   // Frase do dia - fixa até novo login
   const dailyPhrase = useMemo(() => {
@@ -57,35 +57,6 @@ const HomePage = () => {
     sessionStorage.setItem('dailyPhrase', randomPhrase);
     return randomPhrase;
   }, []);
-
-  // Buscar tarefas do Supabase
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!user) return;
-      
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: true });
-      
-      if (error) {
-        console.error('Erro ao buscar tarefas:', error);
-        return;
-      }
-      
-      if (data) {
-        setTasks(data.map(t => ({
-          id: t.id,
-          title: t.title,
-          subtitle: t.subtitle || '',
-          date: t.date
-        })));
-      }
-    };
-
-    fetchTasks();
-  }, [user]);
 
   // Buscar amigos do Supabase
   const fetchFriends = async () => {

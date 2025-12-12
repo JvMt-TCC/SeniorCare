@@ -20,7 +20,7 @@ const CalendarioPage = () => {
     }
   };
 
-  const handleDeleteTask = (id: number) => {
+  const handleDeleteTask = (id: string) => {
     deleteTask(id);
   };
 
@@ -212,7 +212,7 @@ const CalendarioPage = () => {
                   <h4 className="font-semibold text-foreground mb-1">{task.title}</h4>
                   <p className="text-sm text-muted-foreground mb-2">{task.subtitle}</p>
                   <p className="text-sm text-primary font-medium">
-                    {new Date(task.date).toLocaleDateString('pt-BR')}
+                    {new Date(task.date + 'T00:00:00').toLocaleDateString('pt-BR')}
                   </p>
                 </div>
                 <button
