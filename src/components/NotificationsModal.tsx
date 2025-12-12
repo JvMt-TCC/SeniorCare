@@ -92,13 +92,13 @@ const NotificationsModal = ({ open, onOpenChange }: NotificationsModalProps) => 
           {/* Solicitações de Amizade */}
           {pendingRequestsCount > 0 && (
             <div 
-              className="p-4 bg-blue-50 rounded-lg flex items-start gap-3 cursor-pointer hover:bg-blue-100 transition-colors"
+              className="p-4 bg-accent/50 rounded-lg flex items-start gap-3 cursor-pointer hover:bg-accent/70 transition-colors"
               onClick={() => {
                 setIsRequestsModalOpen(true);
                 onOpenChange(false);
               }}
             >
-              <UserPlus className="w-5 h-5 text-blue-600 mt-1" />
+              <UserPlus className="w-5 h-5 text-primary mt-1" />
               <div className="flex-1">
                 <h4 className="font-medium text-foreground">
                   {pendingRequestsCount} {pendingRequestsCount === 1 ? 'Nova Solicitação' : 'Novas Solicitações'} de Amizade
