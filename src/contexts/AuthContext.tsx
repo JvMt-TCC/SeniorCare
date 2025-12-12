@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { toast } from "@/hooks/use-toast";
+import { capacitorStorage } from "@/lib/storage";
 
 interface Profile {
   id: string;
@@ -242,11 +243,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Limpar frase do dia para nova seleção no próximo login
       sessionStorage.removeItem('dailyPhrase');
       
-      // Clear remembered username if user logs out
-      const shouldRemember = localStorage.getItem("rememberMe") === "true";
-      if (!shouldRemember) {
-        localStorage.removeItem("rememberedUsername");
-        localStorage.removeItem("rememberMe");
+      // Clear remembered username if user logs out (usando Capacitor storage)
+      const shouldRemember = await capacitorStorage.getItem("rememberMe");
+      if (shouldRemember !== "true") {
+        await capacitorStorage.removeItem("rememberedUsername");
+        await capacitorStorage.removeItem("rememberMe");
       }
     } catch (error) {
       console.error("Error logging out:", error);

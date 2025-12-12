@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "@/hooks/use-toast";
+import { capacitorStorage } from "@/lib/storage";
 
 interface Alarm {
   id: string;
   title: string;
   time: string;
   isActive: boolean;
-  createdAt: Date;
+  createdAt: string;
 }
 
 interface AlarmContextType {
@@ -18,8 +19,34 @@ interface AlarmContextType {
 
 const AlarmContext = createContext<AlarmContextType | undefined>(undefined);
 
+const ALARMS_STORAGE_KEY = 'seniorcare_alarms';
+
 export const AlarmProvider = ({ children }: { children: ReactNode }) => {
   const [alarms, setAlarms] = useState<Alarm[]>([]);
+  const [initialized, setInitialized] = useState(false);
+
+  // Carregar alarmes do storage na inicialização
+  useEffect(() => {
+    const loadAlarms = async () => {
+      try {
+        const stored = await capacitorStorage.getItem(ALARMS_STORAGE_KEY);
+        if (stored) {
+          setAlarms(JSON.parse(stored));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar alarmes:', error);
+      }
+      setInitialized(true);
+    };
+    loadAlarms();
+  }, []);
+
+  // Salvar alarmes no storage quando mudam
+  useEffect(() => {
+    if (initialized && alarms.length >= 0) {
+      capacitorStorage.setItem(ALARMS_STORAGE_KEY, JSON.stringify(alarms));
+    }
+  }, [alarms, initialized]);
 
   // Verificar alarmes a cada minuto
   useEffect(() => {
@@ -29,7 +56,7 @@ export const AlarmProvider = ({ children }: { children: ReactNode }) => {
       
       alarms.forEach(alarm => {
         if (alarm.isActive && alarm.time === currentTime) {
-          // Disparar notificação
+          // Disparar notificação web (fallback)
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('SeniorCare - Alarme', {
               body: alarm.title,
@@ -37,7 +64,7 @@ export const AlarmProvider = ({ children }: { children: ReactNode }) => {
             });
           }
           
-          // Mostrar toast
+          // Mostrar toast (funciona em qualquer plataforma)
           toast({
             title: "🔔 Alarme!",
             description: alarm.title,
@@ -45,12 +72,12 @@ export const AlarmProvider = ({ children }: { children: ReactNode }) => {
           });
         }
       });
-    }, 60000); // Verificar a cada minuto
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [alarms]);
 
-  // Solicitar permissão para notificações
+  // Solicitar permissão para notificações web
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
@@ -63,7 +90,7 @@ export const AlarmProvider = ({ children }: { children: ReactNode }) => {
       title,
       time,
       isActive: true,
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     };
     setAlarms(prev => [...prev, newAlarm]);
   };
