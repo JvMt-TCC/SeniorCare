@@ -143,20 +143,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      // Primeiro, buscar o email associado ao username (case-insensitive)
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('email')
-        .ilike('username', username.trim())
-        .single();
+      // Use secure function to lookup email by username (prevents exposing all profile data)
+      const { data: emailResult, error: lookupError } = await supabase
+        .rpc('get_email_by_username', { lookup_username: username.trim().toLowerCase() });
 
-      if (profileError || !profileData) {
+      if (lookupError) {
+        console.error("Email lookup error:", lookupError);
+        return { error: "Erro ao buscar usuário." };
+      }
+
+      if (!emailResult || emailResult.length === 0) {
         return { error: "Usuário não encontrado." };
       }
 
-      // Depois, fazer login com o email encontrado
+      const userEmail = emailResult[0].email;
+
+      // Then login with the found email
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: profileData.email,
+        email: userEmail,
         password,
       });
 
