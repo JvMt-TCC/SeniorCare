@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface EditPhoneDialogProps {
   isOpen: boolean;
@@ -11,17 +13,14 @@ interface EditPhoneDialogProps {
 }
 
 const EditPhoneDialog = ({ isOpen, onOpenChange }: EditPhoneDialogProps) => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [phone, setPhone] = useState(profile?.telefone || "");
+  const [loading, setLoading] = useState(false);
 
   const formatPhone = (value: string) => {
-    // Remove tudo que não é número
     const numbers = value.replace(/\D/g, "");
-    
-    // Limita a 11 dígitos
     const limited = numbers.slice(0, 11);
     
-    // Formatar: (21) 99999-9999
     if (limited.length <= 2) {
       return limited;
     } else if (limited.length <= 7) {
@@ -31,12 +30,33 @@ const EditPhoneDialog = ({ isOpen, onOpenChange }: EditPhoneDialogProps) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.trim()) {
-      // TODO: Implement phone update with Supabase
-      console.log("Phone update functionality to be implemented");
+    if (!phone.trim() || !user) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ telefone: phone.trim() })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Telefone atualizado com sucesso!",
+      });
       onOpenChange(false);
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o telefone.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +67,7 @@ const EditPhoneDialog = ({ isOpen, onOpenChange }: EditPhoneDialogProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent className="sm:max-w-md bg-card">
         <DialogHeader className="text-center pb-4">
           <DialogTitle className="text-2xl text-primary mb-2">
             Editar Telefone
@@ -82,14 +102,16 @@ const EditPhoneDialog = ({ isOpen, onOpenChange }: EditPhoneDialogProps) => {
               variant="outline"
               onClick={() => onOpenChange(false)}
               className="flex-1 h-12 rounded-xl border-2"
+              disabled={loading}
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90"
+              disabled={loading}
             >
-              Salvar
+              {loading ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         </form>
