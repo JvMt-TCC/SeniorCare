@@ -1,9 +1,8 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Bell, Clock, User, Bookmark, Calendar as CalendarIcon, AlertTriangle, Phone } from "lucide-react";
+import { Bell, User, Bookmark, Calendar as CalendarIcon, AlertTriangle, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavigation from "./BottomNavigation";
 import NotificationsModal from "./NotificationsModal";
-import AlarmModal from "./AlarmModal";
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,7 +23,6 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { alarms } = useAlarms();
   const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [alarmsOpen, setAlarmsOpen] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -72,68 +70,69 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
 
   return (
     <div className="mobile-container">
-      {/* Header compacto e otimizado para mobile */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
-        <div className="flex justify-between items-center px-3 py-2">
-          <div className="flex items-center gap-1">
+      {/* Header com safe areas do iOS */}
+      <div 
+        className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      >
+        <div className="flex justify-between items-center px-4 py-3">
+          {/* Lado esquerdo - Perfil e Eventos */}
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/perfil')}
-              className="h-9 w-9 hover:bg-primary-soft/50"
+              className="h-10 w-10 hover:bg-primary-soft/50"
             >
-              <User size={20} className="text-foreground" />
+              <User size={22} className="text-foreground" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/meus-eventos')}
-              className="h-9 w-9 hover:bg-primary-soft/50"
+              className="h-10 w-10 hover:bg-primary-soft/50"
             >
-              <Bookmark size={20} className="text-foreground" />
+              <Bookmark size={22} className="text-foreground" />
             </Button>
           </div>
-          <div className="flex items-center gap-1">
+          
+          {/* Lado direito - Emergência, Calendário e Notificações */}
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setEmergencyOpen(true)}
-              className="h-9 w-9 hover:bg-destructive/10 text-destructive"
+              className="h-10 w-10 hover:bg-destructive/10 text-destructive"
             >
-              <AlertTriangle size={20} />
+              <AlertTriangle size={22} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/calendario')}
-              className="h-9 w-9 hover:bg-primary-soft/50"
+              className="h-10 w-10 hover:bg-primary-soft/50"
             >
-              <CalendarIcon size={20} className="text-foreground" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setAlarmsOpen(true)}
-              className="relative h-9 w-9 hover:bg-primary-soft/50"
-            >
-              <Clock size={20} className="text-foreground" />
+              <CalendarIcon size={22} className="text-foreground" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleOpenNotifications}
-              className="relative h-9 w-9 hover:bg-primary-soft/50"
+              className="relative h-10 w-10 hover:bg-primary-soft/50"
             >
-              <Bell size={20} className="text-foreground" />
+              <Bell size={22} className="text-foreground" />
               {hasNewNotifications && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
               )}
             </Button>
           </div>
         </div>
       </div>
 
-      <main className="pb-20 px-4 pt-16 fade-in min-h-screen mobile-scroll">
+      <main 
+        className="pb-24 px-4 fade-in min-h-screen mobile-scroll"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4.5rem)' }}
+      >
         {children}
       </main>
       
@@ -142,10 +141,6 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       <NotificationsModal 
         open={notificationsOpen} 
         onOpenChange={setNotificationsOpen} 
-      />
-      <AlarmModal 
-        open={alarmsOpen} 
-        onOpenChange={setAlarmsOpen} 
       />
       
       <Dialog open={emergencyOpen} onOpenChange={setEmergencyOpen}>
