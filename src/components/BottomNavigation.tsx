@@ -25,22 +25,25 @@ const BottomNavigation = () => {
   const navItems = isVolunteer ? volunteerNavItems : elderNavItems;
 
   return (
-    <nav className="bottom-nav" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
-      <div className="flex justify-around items-center py-2 px-2 overflow-x-auto">
+    <nav 
+      className="bottom-nav"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
+      <div className="flex justify-around items-center py-3 px-4">
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
           return (
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center py-2 px-2 rounded-xl transition-all duration-300 touch-target min-w-fit ${
+              className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 touch-target ${
                 isActive
                   ? "text-primary bg-primary-soft scale-105"
                   : "text-muted-foreground hover:text-primary"
               }`}
             >
-              <Icon size={20} className="mb-1" />
-              <span className="text-xs font-medium whitespace-nowrap">{label}</span>
+              <Icon size={22} className="mb-1" />
+              <span className="text-xs font-medium">{label}</span>
             </Link>
           );
         })}
