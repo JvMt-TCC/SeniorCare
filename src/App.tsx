@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ScrollToTop from "./components/ScrollToTop";
+import PageTransition from "./components/PageTransition";
 import HomePage from "./pages/HomePage";
 import SugestoesPage from "./pages/SugestoesPage";
 import CalendarioPage from "./pages/CalendarioPage";
@@ -47,36 +47,40 @@ const AppContent = () => {
 
   if (!isAuthenticated) {
     return (
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/cadastro" element={<CadastroPage />} />
-        <Route path="*" element={<LoginPage />} />
-      </Routes>
+      <PageTransition>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/cadastro" element={<CadastroPage />} />
+          <Route path="*" element={<LoginPage />} />
+        </Routes>
+      </PageTransition>
     );
   }
 
   return (
     <MobileLayout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/sugestoes" element={<SugestoesPage />} />
-        <Route path="/calendario" element={<CalendarioPage />} />
-        <Route path="/meus-eventos" element={<MeusEventosPage />} />
-        <Route path="/saude" element={<SaudePage />} />
-        <Route path="/saude/medicamentos" element={<MedicamentosPage />} />
-        <Route path="/saude/medicamentos/:id" element={<MedicamentoDetailPage />} />
-        <Route path="/saude/locais" element={<LocaisCuidadoPage />} />
-        <Route path="/saude/locais/:id" element={<LocalCuidadoDetailPage />} />
-        <Route path="/saude/ajuda-amigo" element={<AjudaAmigoPage />} />
-        <Route path="/saude/voluntarios" element={<VoluntariosPage />} />
-        <Route path="/chat/voluntario/:chatId" element={<VolunteerChatPage />} />
-        <Route path="/chat/idoso/:chatId" element={<ElderChatPage />} />
-        <Route path="/mensagens" element={<MensagensPage />} />
-        <Route path="/perfil" element={<PerfilPage />} />
-        <Route path="/privacy-terms" element={<PrivacyTermsPage />} />
-        <Route path="/evento/:id" element={<EventDetailPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <PageTransition>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/sugestoes" element={<SugestoesPage />} />
+          <Route path="/calendario" element={<CalendarioPage />} />
+          <Route path="/meus-eventos" element={<MeusEventosPage />} />
+          <Route path="/saude" element={<SaudePage />} />
+          <Route path="/saude/medicamentos" element={<MedicamentosPage />} />
+          <Route path="/saude/medicamentos/:id" element={<MedicamentoDetailPage />} />
+          <Route path="/saude/locais" element={<LocaisCuidadoPage />} />
+          <Route path="/saude/locais/:id" element={<LocalCuidadoDetailPage />} />
+          <Route path="/saude/ajuda-amigo" element={<AjudaAmigoPage />} />
+          <Route path="/saude/voluntarios" element={<VoluntariosPage />} />
+          <Route path="/chat/voluntario/:chatId" element={<VolunteerChatPage />} />
+          <Route path="/chat/idoso/:chatId" element={<ElderChatPage />} />
+          <Route path="/mensagens" element={<MensagensPage />} />
+          <Route path="/perfil" element={<PerfilPage />} />
+          <Route path="/privacy-terms" element={<PrivacyTermsPage />} />
+          <Route path="/evento/:id" element={<EventDetailPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PageTransition>
     </MobileLayout>
   );
 };
@@ -90,7 +94,6 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <ScrollToTop />
               <AppContent />
             </BrowserRouter>
           </TaskProvider>

@@ -141,26 +141,35 @@ const ElderChatPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] -mt-4 -mx-4 bg-gradient-to-br from-primary-soft via-background to-secondary">
+    <div 
+      className="flex flex-col -mt-4 -mx-4 bg-gradient-to-br from-primary-soft via-background to-secondary animate-fade-in"
+      style={{ 
+        height: 'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 6rem)',
+        minHeight: '400px'
+      }}
+    >
       {/* Header */}
-      <div className="bg-white border-b border-border px-4 py-3 flex items-center gap-3 shadow-sm">
+      <div 
+        className="bg-background/95 backdrop-blur-md border-b border-border/50 px-4 py-3 flex items-center gap-3 shadow-sm"
+      >
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate('/saude/voluntarios')}
+          className="h-11 w-11 rounded-xl hover:bg-primary/10"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={24} className="text-foreground" />
         </Button>
         {chatInfo && (
           <>
-            <Avatar className="w-10 h-10">
+            <Avatar className="w-12 h-12 border-2 border-primary/20">
               <AvatarImage src={chatInfo.volunteer_avatar || undefined} />
-              <AvatarFallback className="bg-primary-soft text-primary">
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                 {chatInfo.volunteer_name.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="font-semibold">{chatInfo.volunteer_name}</p>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-foreground truncate">{chatInfo.volunteer_name}</p>
               <p className="text-xs text-muted-foreground">Voluntário</p>
             </div>
           </>
@@ -169,22 +178,27 @@ const ElderChatPage = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Inicie uma conversa!</p>
+          </div>
+        )}
         {messages.map((message) => {
           const isFromUser = message.from_user_id === user?.id;
           return (
             <div
               key={message.id}
-              className={`flex ${isFromUser ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${isFromUser ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
               <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2 ${
+                className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
                   isFromUser
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-white border border-border'
+                    ? 'bg-primary text-primary-foreground rounded-br-md'
+                    : 'bg-background border border-border/50 rounded-bl-md'
                 }`}
               >
-                <p className="text-senior-base">{message.content}</p>
-                <p className={`text-xs mt-1 ${isFromUser ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                <p className="text-base leading-relaxed">{message.content}</p>
+                <p className={`text-xs mt-1.5 ${isFromUser ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                   {new Date(message.created_at).toLocaleTimeString('pt-BR', {
                     hour: '2-digit',
                     minute: '2-digit'
@@ -198,19 +212,22 @@ const ElderChatPage = () => {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-border p-4">
-        <div className="flex gap-2">
+      <div 
+        className="bg-background/95 backdrop-blur-md border-t border-border/50 p-4"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
+      >
+        <div className="flex gap-3">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Digite sua mensagem..."
-            className="flex-1 text-senior-base"
+            className="flex-1 h-12 text-base bg-secondary/50 border-border/50 rounded-xl focus:border-primary"
           />
           <Button
             onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            className="btn-primary"
+            className="h-12 w-12 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50"
           >
             <Send size={20} />
           </Button>
