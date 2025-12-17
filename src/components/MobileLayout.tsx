@@ -75,52 +75,48 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
         className="fixed top-0 left-0 right-0 z-40 bg-background/98 backdrop-blur-md border-b border-border/50 shadow-sm"
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
-        <div className="flex justify-between items-center px-4 py-3">
-          {/* Lado esquerdo - Perfil e Eventos */}
-          <div className="flex items-center gap-2">
+        <div className="flex justify-center items-center px-4 py-2">
+          {/* Todos os ícones centralizados em uma linha */}
+          <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/perfil')}
-              className="h-10 w-10 hover:bg-primary-soft/50"
+              className="h-11 w-11 hover:bg-primary-soft/50"
             >
-              <User size={22} className="text-foreground" />
+              <User size={24} className="text-foreground" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/meus-eventos')}
-              className="h-10 w-10 hover:bg-primary-soft/50"
+              className="h-11 w-11 hover:bg-primary-soft/50"
             >
-              <Bookmark size={22} className="text-foreground" />
+              <Bookmark size={24} className="text-foreground" />
             </Button>
-          </div>
-          
-          {/* Lado direito - Emergência, Calendário e Notificações */}
-          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setEmergencyOpen(true)}
-              className="h-10 w-10 hover:bg-destructive/10 text-destructive"
+              className="h-11 w-11 hover:bg-destructive/10 text-destructive"
             >
-              <AlertTriangle size={22} />
+              <AlertTriangle size={24} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/calendario')}
-              className="h-10 w-10 hover:bg-primary-soft/50"
+              className="h-11 w-11 hover:bg-primary-soft/50"
             >
-              <CalendarIcon size={22} className="text-foreground" />
+              <CalendarIcon size={24} className="text-foreground" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleOpenNotifications}
-              className="relative h-10 w-10 hover:bg-primary-soft/50"
+              className="relative h-11 w-11 hover:bg-primary-soft/50"
             >
-              <Bell size={22} className="text-foreground" />
+              <Bell size={24} className="text-foreground" />
               {hasNewNotifications && (
                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
               )}
@@ -131,7 +127,7 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
 
       <main 
         className="pb-24 px-4 fade-in min-h-screen mobile-scroll"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4.5rem)' }}
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)' }}
       >
         {children}
       </main>
